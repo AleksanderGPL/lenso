@@ -19,7 +19,6 @@ import {
   resetPasswordSchema,
   signUpSchema,
 } from "@/schema/services/auth.ts";
-import oauth from "./oauth.ts";
 import { rateLimit } from "@/middleware/ratelimit.ts";
 import { COOKIE_DOMAIN, COOKIE_SECURE, FRONTEND_URL } from "@/utils/global.ts";
 import { pusher } from "@/utils/pusher.ts";
@@ -27,8 +26,6 @@ import { z } from "zod";
 import { getIp } from "@/utils/ip.ts";
 
 const app = new Hono();
-
-app.route("/oauth", oauth);
 
 app.get(
   "/",

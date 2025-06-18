@@ -15,8 +15,8 @@
     "zod": "npm:zod@^3.25.67"
   },
   "tasks": {
-    "start": "deno run --allow-net main.ts",
-    "dev": "deno run --allow-net --watch main.ts"
+    "start": "deno run --allow-net --allow-env --allow-read --allow-ffi --allow-sys main.ts",
+    "dev": "deno run --allow-net --allow-env --allow-read --allow-ffi --allow-sys --watch main.ts"
   },
   "compilerOptions": {
     "jsx": "precompile",
