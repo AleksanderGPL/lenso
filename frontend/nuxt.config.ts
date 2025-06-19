@@ -10,5 +10,16 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()]
   },
 
+  runtimeConfig: {
+    public: {
+      apiBase: '',
+      s3Endpoint: '',
+      s3Bucket: '',
+      pusherKey: '',
+      pusherCluster: '',
+      pusherWsHost: ''
+    }
+  },
+
   modules: ['@pinia/nuxt', '@nuxt/icon', '@nuxt/fonts']
 });

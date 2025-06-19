@@ -1,8 +1,8 @@
 <template>
   <div class="flex h-dvh">
     <div
-      class="bg-neutral-900 h-screen overflow-hidden transition-all"
-      :class="{ 'w-64 p-4': isShown, 'w-0 p-0': !isShown }"
+      class="bg-neutral-900 h-screen overflow-hidden transition-all w-64 p-4 fixed"
+      :class="{ '-translate-x-full': !isShown }"
     >
       <header class="flex justify-between items-center mb-2">
         <div class="flex items-center gap-2">
@@ -38,14 +38,29 @@
           </NuxtLink>
         </ul>
       </nav>
+      <div class="border-t pt-4">
+        <span>{{ userStore.current?.username }}</span>
+      </div>
     </div>
-    <div>
+    <UiButton
+      class="absolute top-4 left-4 transition-all"
+      :class="{
+        'opacity-100': !isShown,
+        'opacity-0': isShown
+      }"
+      icon="mdi:chevron-right"
+      variant="outline"
+      size="small"
+      @click="isShown = !isShown"
+    />
+    <div class="transition-all" :class="{ 'ml-64': isShown }">
       <slot />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+const userStore = useUserStore();
 const isShown = ref(true);
 
 const options = [

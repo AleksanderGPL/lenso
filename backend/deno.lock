@@ -6,6 +6,7 @@
     "npm:@types/node@*": "22.15.15",
     "npm:argon2@0.43": "0.43.0",
     "npm:dotenv@^16.5.0": "16.5.0",
+    "npm:drizzle-kit@0.31.1": "0.31.1_esbuild@0.25.5",
     "npm:drizzle-kit@~0.31.1": "0.31.1_esbuild@0.25.5",
     "npm:drizzle-orm@~0.44.2": "0.44.2",
     "npm:hono@^4.8.0": "4.8.0",
