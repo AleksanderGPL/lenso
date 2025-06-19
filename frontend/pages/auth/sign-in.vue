@@ -76,7 +76,7 @@ async function signIn() {
     });
 
     userStore.current = response.data;
-    navigateTo('/');
+    navigateTo('/dash');
   } catch (e) {
     if (e instanceof AxiosError) {
       error.value = e.response?.data.message;

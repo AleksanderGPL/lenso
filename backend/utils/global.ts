@@ -75,3 +75,9 @@ export const PUSHER_KEY = Deno.env.get("PUSHER_KEY")!;
 export const PUSHER_SECRET = Deno.env.get("PUSHER_SECRET")!;
 export const PUSHER_APP_ID = Deno.env.get("PUSHER_APP_ID")!;
 export const PUSHER_HOST = Deno.env.get("PUSHER_HOST")!;
+
+export const GALLERY_ACCESS_LEVELS = [
+  "OWNER",
+  "EDITOR",
+  "VIEWER",
+] as const;

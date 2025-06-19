@@ -8,18 +8,7 @@
     </div>
     <Teleport to="body">
       <Transition name="fade" mode="out-in">
-        <UiModal
-          card-class="w-md"
-          @close="isOpen = false"
-          v-if="isOpen"
-          title="Add gallery"
-        >
-          <template #footer>
-            <UiButton @click="isOpen = false" size="small" icon="mdi:plus"
-              >Create</UiButton
-            >
-          </template>
-        </UiModal>
+        <ModalAddGallery v-if="isOpen" @close="isOpen = false" />
       </Transition>
     </Teleport>
   </div>

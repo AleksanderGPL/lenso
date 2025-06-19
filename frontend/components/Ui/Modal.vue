@@ -12,10 +12,12 @@
           @click="emit('close')"
         ></UiButton>
       </div>
-      <hr class="h-1 text-neutral-800 -mx-4" />
-      <slot />
-      <hr class="h-1 text-neutral-800 -mx-4" />
-      <div class="flex justify-end items-center pt-2">
+      <hr class="text-neutral-800 -mx-4" />
+      <div class="my-4">
+        <slot />
+      </div>
+      <hr class="text-neutral-800 -mx-4" />
+      <div class="flex justify-end items-center pt-4">
         <slot name="footer" />
       </div>
     </UiCard>
