@@ -53,7 +53,7 @@
       size="small"
       @click="isShown = !isShown"
     />
-    <div class="transition-all" :class="{ 'ml-64': isShown }">
+    <div class="transition-all w-full p-4" :class="{ 'ml-64': isShown }">
       <slot />
     </div>
   </div>
@@ -70,9 +70,9 @@ const options = [
     to: '/dash'
   },
   {
-    name: 'Profile',
-    icon: 'mdi:account',
-    to: '/dash/profile'
+    name: 'Galleries',
+    icon: 'material-symbols:photo-library-outline-rounded',
+    to: '/dash/galleries'
   }
 ];
 </script>
