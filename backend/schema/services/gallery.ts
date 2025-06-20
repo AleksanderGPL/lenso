@@ -13,3 +13,10 @@ export const createGallerySchema = z.object({
     "Description must be at most 256 characters long",
   ),
 });
+
+export const galleryByIdSchema = z.object({
+  galleryId: z.string().refine(
+    (value) => !isNaN(Number(value)),
+    "galleryId must be a valid number",
+  ).transform((value) => Number(value)),
+});

@@ -55,7 +55,7 @@ export const galleriesTable = pgTable("galleries", {
   createdAt: timestamp().notNull().defaultNow(),
 });
 
-export const galleriesAccessTable = pgTable("gallery_access", {
+export const galleryAccessTable = pgTable("gallery_access", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   galleryId: integer()
     .notNull()
@@ -66,12 +66,19 @@ export const galleriesAccessTable = pgTable("gallery_access", {
   accessLevel: accessLevels().notNull(),
 });
 
-export const galleriesAccessRelations = relations(
-  galleriesAccessTable,
+export const galleryAccessRelations = relations(
+  galleryAccessTable,
   ({ one }) => ({
     gallery: one(galleriesTable, {
-      fields: [galleriesAccessTable.galleryId],
+      fields: [galleryAccessTable.galleryId],
       references: [galleriesTable.id],
     }),
   }),
 );
+
+export const galleryPhotosTable = pgTable("gallery_photos", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  galleryId: integer()
+    .notNull()
+    .references(() => galleriesTable.id, { onDelete: "cascade" }),
+});

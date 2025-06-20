@@ -2,9 +2,12 @@ import { authRequired } from "@/middleware/auth.ts";
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { db } from "@/db/index.ts";
-import { galleriesAccessTable, galleriesTable } from "@/db/schema.ts";
+import { galleriesTable, galleryAccessTable } from "@/db/schema.ts";
 import { and, eq } from "drizzle-orm";
-import { createGallerySchema } from "@/schema/services/gallery.ts";
+import {
+  createGallerySchema,
+  galleryByIdSchema,
+} from "@/schema/services/gallery.ts";
 import { rateLimit } from "@/middleware/ratelimit.ts";
 import { z } from "zod";
 
@@ -20,11 +23,11 @@ app.get(
   async (c) => {
     const session = c.get("session");
 
-    const galleries = await db.query.galleriesAccessTable.findMany({
+    const galleries = await db.query.galleryAccessTable.findMany({
       with: {
         gallery: true,
       },
-      where: eq(galleriesAccessTable.userId, session.user.id),
+      where: eq(galleryAccessTable.userId, session.user.id),
       columns: {
         id: true,
       },
@@ -39,12 +42,7 @@ app.get(
   authRequired,
   zValidator(
     "param",
-    z.object({
-      galleryId: z.string().refine(
-        (value) => !isNaN(Number(value)),
-        "galleryId must be a valid number",
-      ).transform((value) => Number(value)),
-    }),
+    galleryByIdSchema,
   ),
   rateLimit({
     windowMs: 60 * 1000,
@@ -54,13 +52,13 @@ app.get(
     const session = c.get("session");
     const { galleryId } = c.req.valid("param");
 
-    const gallery = await db.query.galleriesAccessTable.findFirst({
+    const gallery = await db.query.galleryAccessTable.findFirst({
       with: {
         gallery: true,
       },
       where: and(
-        eq(galleriesAccessTable.userId, session.user.id),
-        eq(galleriesAccessTable.galleryId, galleryId),
+        eq(galleryAccessTable.userId, session.user.id),
+        eq(galleryAccessTable.galleryId, galleryId),
       ),
       columns: {
         id: true,
@@ -74,6 +72,60 @@ app.get(
     }
 
     return c.json(gallery.gallery);
+  },
+);
+
+app.post(
+  "/:galleryId/images",
+  authRequired,
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
+  zValidator("param", galleryByIdSchema),
+  zValidator(
+    "json",
+    z.object({
+      "images[]": z.array(
+        z.instanceof(File)
+          .refine(
+            (file) => file.size > 0,
+            "Uploaded image cannot be empty.",
+          )
+          .refine(
+            (file) => file.type.startsWith("image/"),
+            "File must be an image (e.g., image/jpeg, image/png).",
+          ),
+      )
+        .min(1, "You must upload at least one image."),
+    }),
+  ),
+  async (c) => {
+    const session = c.get("session");
+    const { galleryId } = c.req.valid("param");
+
+    const gallery = await db.query.galleryAccessTable.findFirst({
+      where: and(
+        eq(galleryAccessTable.userId, session.user.id),
+        eq(galleryAccessTable.galleryId, galleryId),
+      ),
+    });
+
+    if (!gallery) {
+      return c.json({
+        message: "Gallery not found",
+      }, 404);
+    }
+
+    if (!["OWNER", "EDITOR"].includes(gallery.accessLevel)) {
+      return c.json({
+        message: "You do not have permission to upload images to this gallery",
+      }, 403);
+    }
+
+    // TODO: Handle upload
+
+    return c.json({ message: "Images uploaded successfully" }, 201);
   },
 );
 
@@ -92,7 +144,7 @@ app.post(
       id: galleriesTable.id,
     });
 
-    await db.insert(galleriesAccessTable).values({
+    await db.insert(galleryAccessTable).values({
       galleryId: gallery.id,
       userId: session.user.id,
       accessLevel: "OWNER",
