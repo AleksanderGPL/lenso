@@ -2,7 +2,11 @@ import { authRequired } from "@/middleware/auth.ts";
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { db } from "@/db/index.ts";
-import { galleriesTable, galleryAccessTable } from "@/db/schema.ts";
+import {
+  galleriesTable,
+  galleryAccessTable,
+  galleryPhotosTable,
+} from "@/db/schema.ts";
 import { and, eq } from "drizzle-orm";
 import {
   createGallerySchema,
@@ -10,6 +14,7 @@ import {
 } from "@/schema/services/gallery.ts";
 import { rateLimit } from "@/middleware/ratelimit.ts";
 import { z } from "zod";
+import { uploadFile } from "@/utils/s3.ts";
 
 const app = new Hono();
 
@@ -84,7 +89,7 @@ app.post(
   }),
   zValidator("param", galleryByIdSchema),
   zValidator(
-    "json",
+    "form",
     z.object({
       "images[]": z.array(
         z.instanceof(File)
@@ -103,6 +108,7 @@ app.post(
   async (c) => {
     const session = c.get("session");
     const { galleryId } = c.req.valid("param");
+    const { "images[]": images } = c.req.valid("form");
 
     const gallery = await db.query.galleryAccessTable.findFirst({
       where: and(
@@ -123,7 +129,31 @@ app.post(
       }, 403);
     }
 
-    // TODO: Handle upload
+    for (const image of images) {
+      if (!/^[a-zA-Z0-9._-]+$/.test(image.name)) {
+        return c.json({
+          message: `Image name ${image.name} contains invalid characters`,
+        }, 400);
+      }
+    }
+
+    try {
+      for (const image of images) {
+        await uploadFile({
+          file: image,
+          key: `gallery/${galleryId}/${image.name}`,
+        });
+        await db.insert(galleryPhotosTable).values({
+          galleryId,
+          fileName: image.name,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to upload image:", error);
+      return c.json({
+        message: "Image upload failed",
+      }, 500);
+    }
 
     return c.json({ message: "Images uploaded successfully" }, 201);
   },

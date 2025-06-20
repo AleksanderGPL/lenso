@@ -81,4 +81,5 @@ export const galleryPhotosTable = pgTable("gallery_photos", {
   galleryId: integer()
     .notNull()
     .references(() => galleriesTable.id, { onDelete: "cascade" }),
+  fileName: text().notNull(),
 });

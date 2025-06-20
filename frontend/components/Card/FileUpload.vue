@@ -31,13 +31,19 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const isDragging = ref(false); // TODO: Add animation
 const emit = defineEmits(['update:files']);
 
+function updateFiles(files: FileList) {
+  emit('update:files', Array.from(files));
+}
+
 function handleFileChange(event: Event) {
   const target = event.target as HTMLInputElement;
-  emit('update:files', target.files);
+  if (!target.files) return;
+  updateFiles(target.files);
 }
 
 function handleDrop(event: DragEvent) {
-  emit('update:files', event.dataTransfer?.files);
+  if (!event.dataTransfer?.files) return;
+  updateFiles(event.dataTransfer.files);
 }
 
 function handleDragOver(event: DragEvent) {
