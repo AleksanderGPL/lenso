@@ -42,6 +42,7 @@ async function handleSubmit() {
 
   if (validation) {
     error.value = validation;
+    return;
   }
 
   await api.post('/gallery', formData.value);

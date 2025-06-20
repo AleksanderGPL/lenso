@@ -65,3 +65,13 @@ export const galleriesAccessTable = pgTable("gallery_access", {
     .references(() => usersTable.id, { onDelete: "cascade" }),
   accessLevel: accessLevels().notNull(),
 });
+
+export const galleriesAccessRelations = relations(
+  galleriesAccessTable,
+  ({ one }) => ({
+    gallery: one(galleriesTable, {
+      fields: [galleriesAccessTable.galleryId],
+      references: [galleriesTable.id],
+    }),
+  }),
+);
