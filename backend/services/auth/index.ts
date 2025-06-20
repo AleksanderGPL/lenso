@@ -42,7 +42,6 @@ app.get(
       email: session.user.email,
       name: session.user.name,
       username: session.user.username,
-      preferredCurrency: session.user.preferredCurrency,
       sessionId: session.id,
       isAdmin: session.user.isAdmin,
     });
@@ -256,7 +255,6 @@ app.post(
       email: user.email,
       name: user.name,
       username: user.username,
-      preferredCurrency: user.preferredCurrency,
       isAdmin: user.isAdmin,
       sessionId: session.id,
     }, 200);

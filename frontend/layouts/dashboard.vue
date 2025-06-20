@@ -61,18 +61,36 @@
 
 <script setup lang="ts">
 const userStore = useUserStore();
+const route = useRoute();
 const isShown = ref(true);
 
-const options = [
-  {
-    name: 'Home',
-    icon: 'mdi:home',
-    to: '/dash'
-  },
-  {
-    name: 'Galleries',
-    icon: 'material-symbols:photo-library-outline-rounded',
-    to: '/dash/galleries'
+const options = computed(() => {
+  if (route.meta.sidebar === 'gallery') {
+    return [
+      {
+        name: 'General',
+        icon: 'mdi:settings',
+        to: `/dash/gallery/${route.params.galleryId}`
+      },
+      {
+        name: 'Photos',
+        icon: 'mdi:image',
+        to: `/dash/gallery/${route.params.galleryId}/photos`
+      }
+    ];
   }
-];
+
+  return [
+    {
+      name: 'Home',
+      icon: 'mdi:home',
+      to: '/dash'
+    },
+    {
+      name: 'Galleries',
+      icon: 'material-symbols:photo-library-outline-rounded',
+      to: '/dash/galleries'
+    }
+  ];
+});
 </script>
