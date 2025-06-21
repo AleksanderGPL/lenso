@@ -9,7 +9,7 @@ import {
 } from "@/db/schema.ts";
 import { and, eq } from "drizzle-orm";
 import {
-  createGallerySchema,
+  createOrModifyGallerySchema,
   galleryByIdSchema,
   imageByIdSchema,
 } from "@/schema/services/gallery.ts";
@@ -275,7 +275,7 @@ app.delete(
 app.post(
   "/",
   authRequired,
-  zValidator("json", createGallerySchema),
+  zValidator("json", createOrModifyGallerySchema),
   async (c) => {
     const session = c.get("session");
     const { name, description } = c.req.valid("json");
@@ -294,6 +294,51 @@ app.post(
     });
 
     return c.json({ message: "Gallery created successfully" }, 201);
+  },
+);
+
+app.put(
+  "/:galleryId",
+  authRequired,
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
+  zValidator(
+    "param",
+    galleryByIdSchema,
+  ),
+  zValidator("json", createOrModifyGallerySchema),
+  async (c) => {
+    const session = c.get("session");
+    const { galleryId } = c.req.valid("param");
+    const { name, description } = c.req.valid("json");
+
+    const access = await db.query.galleryAccessTable.findFirst({
+      where: and(
+        eq(galleryAccessTable.userId, session.user.id),
+        eq(galleryAccessTable.galleryId, galleryId),
+      ),
+    });
+
+    if (!access) {
+      return c.json({
+        message: "Gallery not found",
+      }, 404);
+    }
+
+    if (!["OWNER", "EDITOR"].includes(access.accessLevel)) {
+      return c.json({
+        message: "You do not have permission to modify this gallery",
+      }, 403);
+    }
+
+    await db.update(galleriesTable).set({
+      name,
+      description,
+    }).where(eq(galleriesTable.id, galleryId));
+
+    return c.json({ message: "Gallery updated successfully" }, 200);
   },
 );
 

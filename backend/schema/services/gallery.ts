@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createGallerySchema = z.object({
+export const createOrModifyGallerySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters long").max(
     128,
     "Name must be at most 128 characters long",
