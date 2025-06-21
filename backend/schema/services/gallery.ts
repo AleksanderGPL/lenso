@@ -20,3 +20,10 @@ export const galleryByIdSchema = z.object({
     "galleryId must be a valid number",
   ).transform((value) => Number(value)),
 });
+
+export const imageByIdSchema = z.object({
+  imageId: z.string().refine(
+    (value) => !isNaN(Number(value)),
+    "imageId must be a valid number",
+  ).transform((value) => Number(value)),
+});

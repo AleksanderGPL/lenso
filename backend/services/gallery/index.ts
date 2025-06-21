@@ -11,10 +11,11 @@ import { and, eq } from "drizzle-orm";
 import {
   createGallerySchema,
   galleryByIdSchema,
+  imageByIdSchema,
 } from "@/schema/services/gallery.ts";
 import { rateLimit } from "@/middleware/ratelimit.ts";
 import { z } from "zod";
-import { uploadFileBuffer } from "@/utils/s3.ts";
+import { deleteFile, uploadFileBuffer } from "@/utils/s3.ts";
 import sharp from "sharp";
 
 const app = new Hono();
@@ -204,6 +205,70 @@ app.post(
     }
 
     return c.json({ message: "Images uploaded successfully" }, 201);
+  },
+);
+
+app.delete(
+  "/:galleryId/images/:imageId",
+  authRequired,
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
+  zValidator(
+    "param",
+    z.object({
+      ...galleryByIdSchema.shape,
+      ...imageByIdSchema.shape,
+    }),
+  ),
+  async (c) => {
+    const session = c.get("session");
+    const { galleryId, imageId } = c.req.valid("param");
+
+    const access = await db.query.galleryAccessTable.findFirst({
+      where: and(
+        eq(galleryAccessTable.userId, session.user.id),
+        eq(galleryAccessTable.galleryId, galleryId),
+      ),
+      with: {
+        gallery: {
+          with: {
+            images: true,
+          },
+        },
+      },
+    });
+
+    if (!access) {
+      return c.json({
+        message: "Gallery not found",
+      }, 404);
+    }
+
+    if (!["OWNER", "EDITOR"].includes(access.accessLevel)) {
+      return c.json({
+        message:
+          "You do not have permission to delete images from this gallery",
+      }, 403);
+    }
+
+    if (!access.gallery.images.find((image) => image.id === imageId)) {
+      return c.json({
+        message: "Image not found",
+      }, 404);
+    }
+
+    await deleteFile(`gallery/${galleryId}/${imageId}`);
+
+    await db.delete(galleryImagesTable).where(
+      and(
+        eq(galleryImagesTable.id, imageId),
+        eq(galleryImagesTable.galleryId, galleryId),
+      ),
+    );
+
+    return c.json({ message: "Image deleted successfully" }, 200);
   },
 );
 
