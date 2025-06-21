@@ -5,7 +5,7 @@ import { db } from "@/db/index.ts";
 import {
   galleriesTable,
   galleryAccessTable,
-  galleryPhotosTable,
+  galleryImagesTable,
 } from "@/db/schema.ts";
 import { and, eq } from "drizzle-orm";
 import {
@@ -14,7 +14,8 @@ import {
 } from "@/schema/services/gallery.ts";
 import { rateLimit } from "@/middleware/ratelimit.ts";
 import { z } from "zod";
-import { uploadFile } from "@/utils/s3.ts";
+import { uploadFileBuffer } from "@/utils/s3.ts";
+import sharp from "sharp";
 
 const app = new Hono();
 
@@ -80,6 +81,45 @@ app.get(
   },
 );
 
+app.get(
+  "/:galleryId/images",
+  authRequired,
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
+  zValidator(
+    "param",
+    galleryByIdSchema,
+  ),
+  async (c) => {
+    const session = c.get("session");
+    const { galleryId } = c.req.valid("param");
+
+    const access = await db.query.galleryAccessTable.findFirst({
+      where: and(
+        eq(galleryAccessTable.userId, session.user.id),
+        eq(galleryAccessTable.galleryId, galleryId),
+      ),
+      with: {
+        gallery: {
+          with: {
+            images: true,
+          },
+        },
+      },
+    });
+
+    if (!access) {
+      return c.json({
+        message: "Gallery not found",
+      }, 404);
+    }
+
+    return c.json(access.gallery.images);
+  },
+);
+
 app.post(
   "/:galleryId/images",
   authRequired,
@@ -110,20 +150,20 @@ app.post(
     const { galleryId } = c.req.valid("param");
     const { "images[]": images } = c.req.valid("form");
 
-    const gallery = await db.query.galleryAccessTable.findFirst({
+    const access = await db.query.galleryAccessTable.findFirst({
       where: and(
         eq(galleryAccessTable.userId, session.user.id),
         eq(galleryAccessTable.galleryId, galleryId),
       ),
     });
 
-    if (!gallery) {
+    if (!access) {
       return c.json({
         message: "Gallery not found",
       }, 404);
     }
 
-    if (!["OWNER", "EDITOR"].includes(gallery.accessLevel)) {
+    if (!["OWNER", "EDITOR"].includes(access.accessLevel)) {
       return c.json({
         message: "You do not have permission to upload images to this gallery",
       }, 403);
@@ -139,13 +179,21 @@ app.post(
 
     try {
       for (const image of images) {
-        await uploadFile({
-          file: image,
-          key: `gallery/${galleryId}/${image.name}`,
+        const imageBuffer = await image.arrayBuffer();
+
+        await uploadFileBuffer({
+          buffer: new Uint8Array(imageBuffer),
+          key: `gallery/${access.galleryId}/${image.name}`,
         });
-        await db.insert(galleryPhotosTable).values({
+
+        const sharpImage = sharp(imageBuffer);
+        const metadata = await sharpImage.metadata();
+
+        await db.insert(galleryImagesTable).values({
           galleryId,
           fileName: image.name,
+          height: metadata.height,
+          width: metadata.width,
         });
       }
     } catch (error) {

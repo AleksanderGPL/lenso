@@ -5,11 +5,18 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { GALLERY_ACCESS_LEVELS } from "../utils/global.ts";
 
 export const accessLevels = pgEnum("access_levels", GALLERY_ACCESS_LEVELS);
+
+export const plansTable = pgTable("plans", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  name: text().notNull(),
+  storage: integer().notNull(),
+});
 
 export const usersTable = pgTable("users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -24,6 +31,7 @@ export const usersTable = pgTable("users", {
   passwordResetToken: text().unique(),
   isAdmin: boolean().notNull().default(false),
   isBlocked: boolean().notNull().default(false),
+  planId: integer().references(() => plansTable.id),
   createdAt: timestamp().notNull().defaultNow(),
 });
 
@@ -55,6 +63,13 @@ export const galleriesTable = pgTable("galleries", {
   createdAt: timestamp().notNull().defaultNow(),
 });
 
+export const galleriesRelations = relations(
+  galleriesTable,
+  ({ many }) => ({
+    images: many(galleryImagesTable),
+  }),
+);
+
 export const galleryAccessTable = pgTable("gallery_access", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   galleryId: integer()
@@ -64,7 +79,9 @@ export const galleryAccessTable = pgTable("gallery_access", {
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
   accessLevel: accessLevels().notNull(),
-});
+}, (t) => [
+  unique().on(t.userId, t.galleryId),
+]);
 
 export const galleryAccessRelations = relations(
   galleryAccessTable,
@@ -76,10 +93,24 @@ export const galleryAccessRelations = relations(
   }),
 );
 
-export const galleryPhotosTable = pgTable("gallery_photos", {
+export const galleryImagesTable = pgTable("gallery_images", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   galleryId: integer()
     .notNull()
     .references(() => galleriesTable.id, { onDelete: "cascade" }),
   fileName: text().notNull(),
-});
+  height: integer().notNull(),
+  width: integer().notNull(),
+}, (t) => [
+  unique().on(t.galleryId, t.fileName),
+]);
+
+export const galleryImagesRelations = relations(
+  galleryImagesTable,
+  ({ one }) => ({
+    gallery: one(galleriesTable, {
+      fields: [galleryImagesTable.galleryId],
+      references: [galleriesTable.id],
+    }),
+  }),
+);
