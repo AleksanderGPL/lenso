@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-dvh">
     <div
-      class="bg-neutral-900 h-screen overflow-hidden transition-all w-64 p-4 fixed flex flex-col"
+      class="bg-neutral-900 h-screen overflow-hidden transition-all sm:w-64 w-full p-4 fixed flex flex-col z-10"
       :class="{ '-translate-x-full': !isShown }"
     >
       <header class="flex justify-between items-center mb-2">
@@ -32,6 +32,7 @@
               {{ option.name }}
             </div>
             <Icon
+              v-if="!option.arrowHidden"
               name="mdi:chevron-right"
               class="group-hover:opacity-100 opacity-0 transition-opacity"
             />
@@ -67,6 +68,12 @@ const isShown = ref(true);
 const options = computed(() => {
   if (route.meta.sidebar === 'gallery') {
     return [
+      {
+        name: 'Back',
+        icon: 'mdi:arrow-left',
+        to: `/dash/galleries`,
+        arrowHidden: true
+      },
       {
         name: 'General',
         icon: 'mdi:settings',

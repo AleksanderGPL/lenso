@@ -23,6 +23,7 @@ import type { Image } from '@/types/image';
 
 const api = useApi();
 const isDeleting = ref(false);
+const emit = defineEmits(['delete']);
 
 const props = defineProps<{
   image: Image;
@@ -33,6 +34,7 @@ async function deleteImage() {
   try {
     isDeleting.value = true;
     await api.delete(`/gallery/${props.galleryId}/images/${props.image.id}`);
+    emit('delete');
   } finally {
     isDeleting.value = false;
   }

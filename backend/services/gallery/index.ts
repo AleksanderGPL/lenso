@@ -181,24 +181,33 @@ app.post(
       }
     }
 
+    const uploadedImages = [];
+
     try {
       for (const image of images) {
         const imageBuffer = await image.arrayBuffer();
+
+        const sharpImage = sharp(imageBuffer);
+        const metadata = await sharpImage.metadata();
+
+        const [uploadedImage] = await db.insert(galleryImagesTable).values({
+          galleryId,
+          fileName: image.name,
+          height: metadata.height,
+          width: metadata.width,
+        }).returning({
+          id: galleryImagesTable.id,
+          fileName: galleryImagesTable.fileName,
+          height: galleryImagesTable.height,
+          width: galleryImagesTable.width,
+        });
 
         await uploadFileBuffer({
           buffer: new Uint8Array(imageBuffer),
           key: `gallery/${access.galleryId}/${image.name}`,
         });
 
-        const sharpImage = sharp(imageBuffer);
-        const metadata = await sharpImage.metadata();
-
-        await db.insert(galleryImagesTable).values({
-          galleryId,
-          fileName: image.name,
-          height: metadata.height,
-          width: metadata.width,
-        });
+        uploadedImages.push(uploadedImage);
       }
     } catch (error) {
       console.error("Failed to upload image:", error);
@@ -207,7 +216,7 @@ app.post(
       }, 500);
     }
 
-    return c.json({ message: "Images uploaded successfully" }, 201);
+    return c.json(uploadedImages, 201);
   },
 );
 

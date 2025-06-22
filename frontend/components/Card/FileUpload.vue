@@ -16,17 +16,24 @@
     <div
       class="flex flex-col items-center justify-center mb-2 text-neutral-400"
     >
-      <Icon name="mdi:upload" size="2rem" />
-      <p>Drop files here</p>
-      <p class="text-sm">or</p>
+      <Icon v-if="!isUploading" name="mdi:upload" size="2rem" />
+      <UiLoader v-else />
+      <p v-if="isUploading" class="text-sm mt-2">Uploading...</p>
+      <p v-if="!isUploading">Drop files here</p>
+      <p v-if="!isUploading" class="text-sm">or</p>
     </div>
-    <UiButton icon="mdi:upload" variant="outline" @click="fileInput?.click()"
+    <UiButton
+      v-if="!isUploading"
+      icon="mdi:upload"
+      variant="outline"
+      @click="fileInput?.click()"
       >Choose from device</UiButton
     >
   </UiCard>
 </template>
 
 <script setup lang="ts">
+defineProps<{ isUploading?: boolean }>();
 const fileInput = ref<HTMLInputElement | null>(null);
 const isDragging = ref(false); // TODO: Add animation
 const emit = defineEmits(['update:files']);
