@@ -46,11 +46,11 @@ function handleDrop(event: DragEvent) {
   updateFiles(event.dataTransfer.files);
 }
 
-function handleDragOver(event: DragEvent) {
+function handleDragOver() {
   isDragging.value = true;
 }
 
-function handleDragLeave(event: DragEvent) {
+function handleDragLeave() {
   isDragging.value = false;
 }
 </script>

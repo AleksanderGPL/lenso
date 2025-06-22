@@ -7,10 +7,10 @@
         v-for="image in images"
         :key="image.id"
         :image="image"
-        :galleryId="galleryId as string"
+        :gallery-id="galleryId as string"
       />
     </div>
-    <UiSkeletonLoader v-if="pending" class="w-full grow" :loaderSize="6" />
+    <UiSkeletonLoader v-if="pending" class="w-full grow" :loader-size="6" />
   </div>
 </template>
 

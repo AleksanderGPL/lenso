@@ -3,13 +3,13 @@
     <form class="flex flex-col gap-2">
       <div class="flex flex-col gap-1">
         <UiLabel for="name">Name</UiLabel>
-        <UiInput v-model="formData.name" id="name" placeholder="Name..." />
+        <UiInput id="name" v-model="formData.name" placeholder="Name..." />
       </div>
       <div class="flex flex-col gap-1">
         <UiLabel for="description">Description</UiLabel>
         <UiTextArea
-          v-model="formData.description"
           id="description"
+          v-model="formData.description"
           placeholder="Description..."
         />
       </div>
@@ -18,7 +18,7 @@
       </p>
     </form>
     <template #footer>
-      <UiButton @click="handleSubmit" size="small" icon="mdi:plus"
+      <UiButton size="small" icon="mdi:plus" @click="handleSubmit"
         >Create</UiButton
       >
     </template>

@@ -21,5 +21,5 @@ export default defineNuxtConfig({
     }
   },
 
-  modules: ['@pinia/nuxt', '@nuxt/icon', '@nuxt/fonts']
+  modules: ['@pinia/nuxt', '@nuxt/icon', '@nuxt/fonts', '@nuxt/eslint']
 });
