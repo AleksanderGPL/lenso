@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-dvh">
     <div
-      class="bg-neutral-900 h-screen overflow-hidden transition-all w-64 p-4 fixed"
+      class="bg-neutral-900 h-screen overflow-hidden transition-all w-64 p-4 fixed flex flex-col"
       :class="{ '-translate-x-full': !isShown }"
     >
       <header class="flex justify-between items-center mb-2">
@@ -19,7 +19,7 @@
           @click="isShown = !isShown"
         />
       </header>
-      <nav class="flex flex-col">
+      <nav class="flex flex-col flex-grow">
         <ul class="divide-y divide-neutral-800">
           <NuxtLink
             v-for="option in options"
@@ -38,7 +38,7 @@
           </NuxtLink>
         </ul>
       </nav>
-      <div class="border-t pt-4">
+      <div class="border-t border-neutral-800 pt-4">
         <span>{{ userStore.current?.username }}</span>
       </div>
     </div>

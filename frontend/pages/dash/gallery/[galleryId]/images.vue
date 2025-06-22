@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-2">
+  <div class="flex h-full flex-col gap-2">
     <h2 class="text-xl font-semibold">Images</h2>
     <CardFileUpload @update:files="uploadImages" />
     <div class="grid grid-cols-4 gap-2">
@@ -10,6 +10,7 @@
         :galleryId="galleryId as string"
       />
     </div>
+    <UiSkeletonLoader v-if="pending" class="w-full grow" :loaderSize="6" />
   </div>
 </template>
 
@@ -24,7 +25,7 @@ definePageMeta({
 const api = useApi();
 const { galleryId } = useRoute().params;
 
-const { data: images } = useAsyncData<Image[]>(
+const { data: images, pending } = useAsyncData<Image[]>(
   `gallery-${galleryId}-images`,
   async () => {
     return (await api.get(`/gallery/${galleryId}/images`)).data;
