@@ -1,7 +1,11 @@
 import crypto from "node:crypto";
 import { db } from "@/db/index.ts";
 import { eq } from "drizzle-orm";
-import { userSessionsTable, usersTable } from "@/db/schema.ts";
+import {
+  galleryAccessKeyTable,
+  userSessionsTable,
+  usersTable,
+} from "@/db/schema.ts";
 
 export async function generateEmailVerificationToken() {
   const token = crypto.randomBytes(32).toString("hex");
@@ -71,4 +75,18 @@ export async function generateUniqueAccountDeletionToken() {
   }
 
   return token;
+}
+
+export async function generateUniqueAccessKey() {
+  const key = crypto.randomBytes(32).toString("hex");
+
+  const existingKey = await db.query.galleryAccessKeyTable.findFirst({
+    where: eq(galleryAccessKeyTable.accessKey, key),
+  });
+
+  if (existingKey) {
+    return generateUniqueAccessKey();
+  }
+
+  return key;
 }

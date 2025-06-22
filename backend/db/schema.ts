@@ -67,6 +67,7 @@ export const galleriesRelations = relations(
   galleriesTable,
   ({ many }) => ({
     images: many(galleryImagesTable),
+    accessKeys: many(galleryAccessKeyTable),
   }),
 );
 
@@ -110,6 +111,25 @@ export const galleryImagesRelations = relations(
   ({ one }) => ({
     gallery: one(galleriesTable, {
       fields: [galleryImagesTable.galleryId],
+      references: [galleriesTable.id],
+    }),
+  }),
+);
+
+export const galleryAccessKeyTable = pgTable("gallery_access_key", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  galleryId: integer()
+    .notNull()
+    .references(() => galleriesTable.id, { onDelete: "cascade" }),
+  accessKey: text().notNull().unique(),
+  createdAt: timestamp().notNull().defaultNow(),
+});
+
+export const galleryAccessKeyRelations = relations(
+  galleryAccessKeyTable,
+  ({ one }) => ({
+    gallery: one(galleriesTable, {
+      fields: [galleryAccessKeyTable.galleryId],
       references: [galleriesTable.id],
     }),
   }),

@@ -4,6 +4,7 @@ import { zValidator } from "@hono/zod-validator";
 import { db } from "@/db/index.ts";
 import {
   galleriesTable,
+  galleryAccessKeyTable,
   galleryAccessTable,
   galleryImagesTable,
 } from "@/db/schema.ts";
@@ -17,6 +18,7 @@ import { rateLimit } from "@/middleware/ratelimit.ts";
 import { z } from "zod";
 import { deleteFile, uploadFileBuffer } from "@/utils/s3.ts";
 import sharp from "sharp";
+import { generateUniqueAccessKey } from "@/utils/generate.ts";
 
 const app = new Hono();
 
@@ -339,6 +341,87 @@ app.put(
     }).where(eq(galleriesTable.id, galleryId));
 
     return c.json({ message: "Gallery updated successfully" }, 200);
+  },
+);
+
+app.post(
+  "/:galleryId/accessKey",
+  authRequired,
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
+  zValidator(
+    "param",
+    galleryByIdSchema,
+  ),
+  async (c) => {
+    const session = c.get("session");
+    const { galleryId } = c.req.valid("param");
+
+    const access = await db.query.galleryAccessTable.findFirst({
+      where: and(
+        eq(galleryAccessTable.userId, session.user.id),
+        eq(galleryAccessTable.galleryId, galleryId),
+      ),
+    });
+
+    if (!access) {
+      return c.json({
+        message: "Gallery not found",
+      }, 404);
+    }
+
+    if (!["OWNER", "EDITOR"].includes(access.accessLevel)) {
+      return c.json({
+        message: "You do not have permission to modify this gallery",
+      }, 403);
+    }
+
+    const accessKey = await generateUniqueAccessKey();
+
+    await db.insert(galleryAccessKeyTable).values({
+      galleryId,
+      accessKey,
+    });
+
+    return c.json(accessKey, 201);
+  },
+);
+
+app.get(
+  "/:galleryId/accessKeys",
+  authRequired,
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
+  zValidator(
+    "param",
+    galleryByIdSchema,
+  ),
+  async (c) => {
+    const session = c.get("session");
+    const { galleryId } = c.req.valid("param");
+
+    const access = await db.query.galleryAccessTable.findFirst({
+      where: and(
+        eq(galleryAccessTable.userId, session.user.id),
+        eq(galleryAccessTable.galleryId, galleryId),
+      ),
+    });
+
+    if (!access) {
+      return c.json({
+        message: "Gallery not found",
+      }, 404);
+    }
+
+    const accessKeys = await db.query.galleryAccessKeyTable.findMany({
+      where: eq(galleryAccessKeyTable.galleryId, galleryId),
+    });
+
+    return c.json(accessKeys, 200);
   },
 );
 

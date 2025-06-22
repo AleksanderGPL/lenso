@@ -1,8 +1,12 @@
 <template>
-  <div>
+  <div class="flex flex-col gap-2">
     <h2 class="text-xl font-semibold">General</h2>
-    <form class="grid grid-cols-2 gap-4" @submit.prevent="updateGallery">
-      <div class="flex flex-col gap-2">
+    <div class="grid grid-cols-2 gap-4">
+      <UiCard
+        as="form"
+        class="flex flex-col gap-2"
+        @submit.prevent="updateGallery"
+      >
         <div class="flex flex-col gap-1">
           <UiLabel>Name</UiLabel>
           <UiInput v-if="!pending && gallery" v-model="gallery.name" />
@@ -16,8 +20,9 @@
         <UiButton icon="mdi:content-save-outline" :loading="isSaving"
           >Save</UiButton
         >
-      </div>
-    </form>
+      </UiCard>
+      <CardGalleryAccessLinks :gallery-id="Number(galleryId)" />
+    </div>
   </div>
 </template>
 
