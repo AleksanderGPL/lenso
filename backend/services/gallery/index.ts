@@ -10,6 +10,7 @@ import {
 } from "@/db/schema.ts";
 import { and, eq } from "drizzle-orm";
 import {
+  createAccessKeySchema,
   createOrModifyGallerySchema,
   galleryByIdSchema,
   imageByIdSchema,
@@ -355,9 +356,14 @@ app.post(
     "param",
     galleryByIdSchema,
   ),
+  zValidator(
+    "json",
+    createAccessKeySchema,
+  ),
   async (c) => {
     const session = c.get("session");
     const { galleryId } = c.req.valid("param");
+    const { name, canDownload } = c.req.valid("json");
 
     const access = await db.query.galleryAccessTable.findFirst({
       where: and(
@@ -381,8 +387,10 @@ app.post(
     const accessKey = await generateUniqueAccessKey();
 
     await db.insert(galleryAccessKeyTable).values({
+      name,
       galleryId,
       accessKey,
+      canDownload,
     });
 
     return c.json(accessKey, 201);

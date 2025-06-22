@@ -27,3 +27,11 @@ export const imageByIdSchema = z.object({
     "imageId must be a valid number",
   ).transform((value) => Number(value)),
 });
+
+export const createAccessKeySchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters long").max(
+    256,
+    "Name must be at most 256 characters long",
+  ),
+  canDownload: z.boolean(),
+});

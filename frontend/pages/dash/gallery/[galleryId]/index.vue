@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-2">
     <h2 class="text-xl font-semibold">General</h2>
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <UiCard
         as="form"
         class="flex flex-col gap-2"

@@ -122,6 +122,8 @@ export const galleryAccessKeyTable = pgTable("gallery_access_key", {
     .notNull()
     .references(() => galleriesTable.id, { onDelete: "cascade" }),
   accessKey: text().notNull().unique(),
+  name: text().notNull(),
+  canDownload: boolean().notNull(),
   createdAt: timestamp().notNull().defaultNow(),
 });
 
