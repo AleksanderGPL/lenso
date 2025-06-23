@@ -13,6 +13,9 @@
     </div>
     <img
       :src="getS3Url(`gallery/${galleryId}/${image.fileName}`)"
+      :width="image.width"
+      :height="image.height"
+      loading="lazy"
       class="object-cover"
     />
   </div>

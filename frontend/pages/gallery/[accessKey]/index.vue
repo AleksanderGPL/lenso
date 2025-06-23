@@ -30,6 +30,7 @@
             :src="getS3Url(`gallery/${data?.gallery.id}/${item.fileName}`)"
             :width="item.width"
             :height="item.height"
+            loading="lazy"
           />
         </div>
       </template>
