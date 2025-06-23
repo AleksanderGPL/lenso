@@ -16,7 +16,9 @@
     v-bind="$attrs"
   >
     <UiLoader v-if="loading" :size="1" variant="white" />
-    <Icon v-else-if="icon" :name="icon" />
+    <Transition name="fade" mode="out-in">
+      <Icon v-if="icon && !loading" :key="icon" :name="icon" />
+    </Transition>
     <slot />
   </component>
 </template>

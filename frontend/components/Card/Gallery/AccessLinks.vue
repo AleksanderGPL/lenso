@@ -1,10 +1,12 @@
 <template>
   <UiCard>
     <h3 class="text-lg font-semibold">Links</h3>
-    <ul>
-      <li v-for="accessKey in accessKeys" :key="accessKey.id">
-        {{ accessKey.name }}
-      </li>
+    <ul class="divide-y divide-neutral-800 max-h-full overflow-y-auto">
+      <CardGalleryAccessLinkRecord
+        v-for="accessKey in accessKeys"
+        :key="accessKey.id"
+        :record="accessKey"
+      />
     </ul>
     <UiButton icon="mdi:plus" @click="showModal = true">New</UiButton>
     <Teleport to="body">

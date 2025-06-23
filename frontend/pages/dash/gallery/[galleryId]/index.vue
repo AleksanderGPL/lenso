@@ -4,7 +4,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <UiCard
         as="form"
-        class="flex flex-col gap-2"
+        class="flex flex-col gap-2 h-fit"
         @submit.prevent="updateGallery"
       >
         <div class="flex flex-col gap-1">
@@ -21,7 +21,7 @@
           >Save</UiButton
         >
       </UiCard>
-      <CardGalleryAccessLinks :gallery-id="Number(galleryId)" />
+      <CardGalleryAccessLinks :gallery-id="Number(galleryId)" class="h-fit" />
     </div>
   </div>
 </template>
