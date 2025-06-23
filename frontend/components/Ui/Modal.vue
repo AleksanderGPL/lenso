@@ -4,20 +4,23 @@
   >
     <UiCard :class="cardClass">
       <div class="flex justify-between items-center pb-4">
-        <span class="font-semibold text-xl">{{ title }}</span>
+        <span v-if="!hideHeader" class="font-semibold text-xl">{{
+          title
+        }}</span>
         <UiButton
+          v-if="!hideHeader"
           icon="mdi:close"
           variant="outline"
           size="small"
           @click="emit('close')"
         ></UiButton>
       </div>
-      <hr class="text-neutral-800 -mx-4" />
-      <div class="my-4">
+      <hr v-if="!hideHeader" class="text-neutral-800 -mx-4" />
+      <div :class="{ 'my-4': !hideHeader }">
         <slot />
       </div>
-      <hr class="text-neutral-800 -mx-4" />
-      <div class="flex justify-end items-center pt-4">
+      <hr v-if="!hideFooter" class="text-neutral-800 -mx-4" />
+      <div v-if="!hideFooter" class="flex justify-end items-center pt-4">
         <slot name="footer" />
       </div>
     </UiCard>
@@ -28,6 +31,8 @@
 defineProps<{
   title?: string;
   cardClass?: string;
+  hideFooter?: boolean;
+  hideHeader?: boolean;
 }>();
 
 const emit = defineEmits(['close']);

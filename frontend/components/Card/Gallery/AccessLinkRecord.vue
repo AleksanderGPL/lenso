@@ -13,9 +13,22 @@
         variant="danger"
         size="small"
         :loading="isDeleting"
-        @click="deleteLink"
+        @click="isDeleteModalOpen = true"
       ></UiButton>
     </div>
+    <Teleport to="body">
+      <Transition name="fade" mode="out-in">
+        <ModalConfirm
+          v-if="isDeleteModalOpen"
+          :hide-footer="true"
+          :hide-header="true"
+          @cancel="isDeleteModalOpen = false"
+          @confirm="deleteLink"
+        >
+          <p>Are you sure you want to delete this link?</p>
+        </ModalConfirm>
+      </Transition>
+    </Teleport>
   </li>
 </template>
 
@@ -27,6 +40,7 @@ const emit = defineEmits(['delete']);
 const props = defineProps<{ record: AccessKey }>();
 const recentlyCopied = ref(false);
 const isDeleting = ref(false);
+const isDeleteModalOpen = ref(false);
 
 function copyLink() {
   recentlyCopied.value = true;
@@ -40,6 +54,7 @@ function copyLink() {
 
 async function deleteLink() {
   try {
+    isDeleteModalOpen.value = false;
     isDeleting.value = true;
     await api.delete(
       `/gallery/${props.record.galleryId}/access/${props.record.accessKey}`
