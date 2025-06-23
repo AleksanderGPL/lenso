@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { createGallerySchema } from '@/schema/services/gallery';
+import { createOrModifyGallerySchema } from '@/schema/services/gallery';
 
 const api = useApi();
 const emit = defineEmits(['close']);
@@ -38,7 +38,7 @@ const formData = ref({
 });
 
 async function handleSubmit() {
-  const validation = validate(createGallerySchema, formData.value);
+  const validation = validate(createOrModifyGallerySchema, formData.value);
 
   if (validation) {
     error.value = validation;

@@ -6,7 +6,9 @@
   >
     <div class="flex flex-col gap-2">
       <h2 class="text-xl font-semibold">{{ gallery.name }}</h2>
-      <p class="text-sm text-neutral-400">{{ gallery.description }}</p>
+      <p v-if="gallery.description" class="text-sm text-neutral-400">
+        {{ gallery.description }}
+      </p>
     </div>
   </UiCard>
 </template>

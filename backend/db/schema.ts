@@ -59,7 +59,7 @@ export const userSessionsRelations = relations(
 export const galleriesTable = pgTable("galleries", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: text().notNull(),
-  description: text().notNull(),
+  description: text(),
   createdAt: timestamp().notNull().defaultNow(),
 });
 
