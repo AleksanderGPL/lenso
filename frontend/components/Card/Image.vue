@@ -1,7 +1,7 @@
 <template>
   <div
     :key="image.id"
-    class="relative border border-neutral-700 rounded-lg overflow-hidden"
+    class="relative border border-neutral-700 rounded-lg overflow-hidden h-fit"
   >
     <div class="absolute top-2 right-2">
       <UiButton
@@ -13,7 +13,7 @@
     </div>
     <img
       :src="getS3Url(`gallery/${galleryId}/${image.fileName}`)"
-      class="p-2"
+      class="object-cover"
     />
   </div>
 </template>

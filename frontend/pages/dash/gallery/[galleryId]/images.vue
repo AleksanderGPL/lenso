@@ -2,17 +2,25 @@
   <div class="flex h-full flex-col gap-2">
     <h2 class="text-xl font-semibold">Images</h2>
     <CardFileUpload :is-uploading="isUploading" @update:files="uploadImages" />
-    <div class="grid grid-cols-4 gap-2">
-      <TransitionGroup name="fade">
-        <CardImage
-          v-for="image in images"
-          :key="image.id"
-          :image="image"
-          :gallery-id="galleryId as string"
-          @delete="deleteImage(image)"
-        />
-      </TransitionGroup>
-    </div>
+    <TransitionGroup name="fade">
+      <masonry-wall
+        v-if="images && images.length > 0"
+        class="mt-0.5"
+        :items="images"
+        :ssr-columns="1"
+        :column-width="500"
+        :gap="10"
+      >
+        <template #default="{ item }">
+          <CardImage
+            :key="item.id"
+            :image="item"
+            :gallery-id="galleryId as string"
+            @delete="deleteImage(item)"
+          />
+        </template>
+      </masonry-wall>
+    </TransitionGroup>
     <UiSkeletonLoader v-if="pending" class="w-full grow" :loader-size="6" />
   </div>
 </template>
