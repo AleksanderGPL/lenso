@@ -20,8 +20,11 @@ import { z } from "zod";
 import { deleteFile, uploadFileBuffer } from "@/utils/s3.ts";
 import sharp from "sharp";
 import { generateUniqueAccessKey } from "@/utils/generate.ts";
+import access from "./access.ts";
 
 const app = new Hono();
+
+app.route("/access", access);
 
 app.get(
   "/",

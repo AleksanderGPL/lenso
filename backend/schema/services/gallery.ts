@@ -28,6 +28,10 @@ export const imageByIdSchema = z.object({
   ).transform((value) => Number(value)),
 });
 
+export const accessKeySchema = z.object({
+  accessKey: z.string(),
+});
+
 export const createAccessKeySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters long").max(
     256,
