@@ -6,6 +6,7 @@
         v-for="accessKey in accessKeys"
         :key="accessKey.id"
         :record="accessKey"
+        @delete="deleteLink(accessKey)"
       />
     </ul>
     <UiButton icon="mdi:plus" @click="showModal = true">New</UiButton>
@@ -15,6 +16,7 @@
           v-if="showModal"
           :gallery-id="props.galleryId"
           @close="showModal = false"
+          @add="accessKeys?.push($event)"
         />
       </Transition>
     </Teleport>
@@ -35,4 +37,12 @@ const { data: accessKeys } = useAsyncData<AccessKey[]>(
     return (await api.get(`/gallery/${props.galleryId}/accessKeys`)).data;
   }
 );
+
+function deleteLink(accessKey: AccessKey) {
+  if (accessKeys.value) {
+    accessKeys.value = accessKeys.value.filter(
+      (key) => key.id !== accessKey.id
+    );
+  }
+}
 </script>

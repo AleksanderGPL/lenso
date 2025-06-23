@@ -52,7 +52,7 @@ async function uploadImages(files: File[]) {
       images: files
     });
 
-    images.value?.unshift(...response.data);
+    images.value?.push(...response.data);
   } finally {
     isUploading.value = false;
   }

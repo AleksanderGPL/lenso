@@ -27,7 +27,7 @@ import { createAccessKeySchema } from '@/schema/services/gallery';
 const props = defineProps<{ galleryId: number }>();
 
 const api = useApi();
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'add']);
 const error = ref('');
 
 const formData = ref({
@@ -43,7 +43,11 @@ async function handleSubmit() {
     return;
   }
 
-  await api.post(`/gallery/${props.galleryId}/accessKey`, formData.value);
+  const response = await api.post(
+    `/gallery/${props.galleryId}/accessKey`,
+    formData.value
+  );
+  emit('add', response.data);
   emit('close');
 }
 </script>

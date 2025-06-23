@@ -10,6 +10,7 @@ import {
 } from "@/db/schema.ts";
 import { and, eq } from "drizzle-orm";
 import {
+  accessKeySchema,
   createAccessKeySchema,
   createOrModifyGallerySchema,
   galleryByIdSchema,
@@ -188,6 +189,19 @@ app.post(
 
     try {
       for (const image of images) {
+        const nameConflict = await db.query.galleryImagesTable.findFirst({
+          where: and(
+            eq(galleryImagesTable.galleryId, galleryId),
+            eq(galleryImagesTable.fileName, image.name),
+          ),
+        });
+
+        if (nameConflict) {
+          return c.json({
+            message: `Image ${image.name} already exists in this gallery`,
+          }, 400);
+        }
+
         const imageBuffer = await image.arrayBuffer();
 
         const sharpImage = sharp(imageBuffer);
@@ -398,14 +412,14 @@ app.post(
 
     const accessKey = await generateUniqueAccessKey();
 
-    await db.insert(galleryAccessKeyTable).values({
+    const [insertedKey] = await db.insert(galleryAccessKeyTable).values({
       name,
       galleryId,
       accessKey,
       canDownload,
-    });
+    }).returning();
 
-    return c.json(accessKey, 201);
+    return c.json(insertedKey, 201);
   },
 );
 
@@ -442,6 +456,48 @@ app.get(
     });
 
     return c.json(accessKeys, 200);
+  },
+);
+
+app.delete(
+  "/:galleryId/access/:accessKey",
+  authRequired,
+  zValidator(
+    "param",
+    z.object({ ...galleryByIdSchema.shape, ...accessKeySchema.shape }),
+  ),
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
+  async (c) => {
+    const session = c.get("session");
+    const { galleryId, accessKey } = c.req.valid("param");
+
+    const access = await db.query.galleryAccessTable.findFirst({
+      where: and(
+        eq(galleryAccessTable.userId, session.user.id),
+        eq(galleryAccessTable.galleryId, galleryId),
+      ),
+    });
+
+    if (!access) {
+      return c.json({
+        message: "Gallery not found",
+      }, 404);
+    }
+
+    if (!["OWNER", "EDITOR"].includes(access.accessLevel)) {
+      return c.json({
+        message: "You do not have permission to modify this gallery",
+      }, 403);
+    }
+
+    await db.delete(galleryAccessKeyTable).where(
+      eq(galleryAccessKeyTable.accessKey, accessKey),
+    );
+
+    return c.json({ message: "Access key deleted successfully" }, 200);
   },
 );
 
