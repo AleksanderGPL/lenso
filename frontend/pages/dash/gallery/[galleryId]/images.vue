@@ -51,9 +51,6 @@ async function uploadImages(files: File[]) {
 }
 
 function deleteImage(image: Image) {
-  const index = images.value?.indexOf(image);
-  if (index) {
-    images.value?.splice(index, 1);
-  }
+  images.value = images.value?.filter((img) => img.id !== image.id) || [];
 }
 </script>

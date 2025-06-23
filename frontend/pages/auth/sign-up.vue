@@ -77,7 +77,7 @@ const userStore = useUserStore();
 const error = ref('');
 
 if (userStore.current) {
-  navigateTo('/');
+  navigateTo('/dash');
 }
 
 async function signUp() {
