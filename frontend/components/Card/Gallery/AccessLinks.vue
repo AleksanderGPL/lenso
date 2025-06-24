@@ -9,7 +9,9 @@
         @delete="deleteLink(accessKey)"
       />
     </ul>
-    <UiButton icon="mdi:plus" @click="showModal = true">New</UiButton>
+    <UiButton class="w-full" icon="mdi:plus" @click="showModal = true"
+      >New</UiButton
+    >
     <Teleport to="body">
       <Transition name="fade" mode="out-in">
         <ModalAddLink

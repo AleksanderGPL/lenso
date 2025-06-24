@@ -31,7 +31,8 @@ import type { Gallery } from '~/types/gallery';
 
 definePageMeta({
   layout: 'dashboard',
-  sidebar: 'gallery'
+  sidebar: 'gallery',
+  middleware: 'auth'
 });
 
 const api = useApi();

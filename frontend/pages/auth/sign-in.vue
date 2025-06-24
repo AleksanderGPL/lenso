@@ -23,7 +23,7 @@
           class="w-full"
         />
       </div>
-      <UiButton class="mt-2">Sign in</UiButton>
+      <UiButton class="mt-2" :loading="isLoading">Sign in</UiButton>
       <div class="flex justify-between sm:flex-row flex-col">
         <NuxtLink to="/auth/sign-up" class="sm:text-left text-center"
           >Don't have an account?</NuxtLink
@@ -51,6 +51,7 @@ const email = ref('');
 const password = ref('');
 const api = useApi();
 const userStore = useUserStore();
+const isLoading = ref(false);
 
 const error = ref('');
 
@@ -60,6 +61,8 @@ if (userStore.current) {
 
 async function signIn() {
   try {
+    isLoading.value = true;
+    error.value = '';
     const validation = validate(loginSchema, {
       email: email.value,
       password: password.value
@@ -83,6 +86,8 @@ async function signIn() {
     } else {
       error.value = 'Something went wrong';
     }
+  } finally {
+    isLoading.value = false;
   }
 }
 </script>

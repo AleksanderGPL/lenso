@@ -8,6 +8,7 @@
         icon="mdi:delete"
         variant="danger"
         :loading="isDeleting"
+        square
         @click="deleteImage()"
       />
     </div>

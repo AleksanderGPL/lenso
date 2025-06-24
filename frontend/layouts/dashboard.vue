@@ -39,8 +39,16 @@
           </NuxtLink>
         </ul>
       </nav>
-      <div class="border-t border-neutral-800 pt-4">
+      <div
+        class="border-t border-neutral-800 flex items-center justify-between pt-4"
+      >
         <span>{{ userStore.current?.username }}</span>
+        <UiButton
+          icon="mdi:logout"
+          square
+          :loading="isLoggingOut"
+          @click="logout"
+        />
       </div>
     </div>
     <UiButton
@@ -64,6 +72,7 @@
 const userStore = useUserStore();
 const route = useRoute();
 const isShown = ref(true);
+const isLoggingOut = ref(false);
 
 const options = computed(() => {
   if (route.meta.sidebar === 'gallery') {
@@ -89,15 +98,20 @@ const options = computed(() => {
 
   return [
     {
-      name: 'Home',
-      icon: 'mdi:home',
-      to: '/dash'
-    },
-    {
       name: 'Galleries',
-      icon: 'material-symbols:photo-library-outline-rounded',
+      icon: 'material-symbols:photo-library-rounded',
       to: '/dash/galleries'
     }
   ];
 });
+
+function logout() {
+  try {
+    isLoggingOut.value = true;
+    userStore.logout();
+    navigateTo('/');
+  } finally {
+    isLoggingOut.value = false;
+  }
+}
 </script>

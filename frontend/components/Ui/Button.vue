@@ -3,9 +3,10 @@
     :is="as"
     class="flex items-center justify-center gap-2 rounded-lg cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
     :class="{
-      'px-2 py-1': size === 'small',
-      'px-4 py-2': size === 'medium',
-      'px-6 py-3': size === 'large',
+      'px-2 py-1': size === 'small' && !square,
+      'px-4 py-2': size === 'medium' && !square,
+      'px-6 py-3': size === 'large' && !square,
+      'p-2': square,
       'bg-neutral-900 hover:bg-neutral-800': ['default', 'outline'].includes(
         variant
       ),
@@ -32,6 +33,7 @@ withDefaults(
     disabled?: boolean;
     size?: 'small' | 'medium' | 'large';
     variant?: 'default' | 'outline' | 'danger';
+    square?: boolean;
   }>(),
   {
     as: 'button',
@@ -39,7 +41,8 @@ withDefaults(
     loading: false,
     disabled: false,
     size: 'medium',
-    variant: 'default'
+    variant: 'default',
+    square: false
   }
 );
 </script>

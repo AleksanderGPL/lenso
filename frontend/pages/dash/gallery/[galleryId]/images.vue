@@ -36,7 +36,8 @@ import type { Image } from '@/types/image';
 
 definePageMeta({
   layout: 'dashboard',
-  sidebar: 'gallery'
+  sidebar: 'gallery',
+  middleware: 'auth'
 });
 
 const api = useApi();

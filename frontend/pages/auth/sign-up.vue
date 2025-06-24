@@ -46,7 +46,7 @@
           class="w-full"
         />
       </div>
-      <UiButton class="mt-2">Sign up</UiButton>
+      <UiButton class="mt-2" :loading="isLoading">Sign up</UiButton>
       <p v-if="error" class="text-red-500 text-sm mt-2 text-center">
         {{ error }}
       </p>
@@ -75,6 +75,7 @@ const password = ref('');
 const api = useApi();
 const userStore = useUserStore();
 const error = ref('');
+const isLoading = ref(false);
 
 if (userStore.current) {
   navigateTo('/dash');
@@ -82,6 +83,7 @@ if (userStore.current) {
 
 async function signUp() {
   try {
+    isLoading.value = true;
     error.value = '';
     const payload = {
       name: name.value,
@@ -106,6 +108,8 @@ async function signUp() {
     } else {
       error.value = 'Something went wrong';
     }
+  } finally {
+    isLoading.value = false;
   }
 }
 </script>

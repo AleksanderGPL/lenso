@@ -1,11 +1,7 @@
-<template>
-  <div>
-    <h1>in progress...</h1>
-  </div>
-</template>
-
 <script setup lang="ts">
 definePageMeta({
-  layout: 'dashboard'
+  middleware: 'auth'
 });
+
+navigateTo('/dash/galleries');
 </script>
