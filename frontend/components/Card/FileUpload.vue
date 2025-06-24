@@ -29,14 +29,28 @@
       @click="fileInput?.click()"
       >Choose from device</UiButton
     >
+    <div
+      v-if="canCompress && compress !== undefined && !isUploading"
+      class="flex items-center gap-2 mt-2"
+    >
+      Compress
+      <UiToggle
+        :model-value="compress"
+        @update:model-value="emit('update:compress', $event)"
+      />
+    </div>
   </UiCard>
 </template>
 
 <script setup lang="ts">
-defineProps<{ isUploading?: boolean }>();
+defineProps<{
+  isUploading?: boolean;
+  canCompress?: boolean;
+  compress?: boolean;
+}>();
 const fileInput = ref<HTMLInputElement | null>(null);
 const isDragging = ref(false); // TODO: Add animation
-const emit = defineEmits(['update:files']);
+const emit = defineEmits(['update:files', 'update:compress']);
 
 function updateFiles(files: FileList) {
   emit('update:files', Array.from(files));

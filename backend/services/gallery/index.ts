@@ -151,12 +151,13 @@ app.post(
           ),
       )
         .min(1, "You must upload at least one image."),
+      compress: z.string().transform((value) => value === "true"),
     }),
   ),
   async (c) => {
     const session = c.get("session");
     const { galleryId } = c.req.valid("param");
-    const { "images[]": images } = c.req.valid("form");
+    const { "images[]": images, compress } = c.req.valid("form");
 
     const access = await db.query.galleryAccessTable.findFirst({
       where: and(
@@ -202,14 +203,25 @@ app.post(
           }, 400);
         }
 
-        const imageBuffer = await image.arrayBuffer();
+        let imageBuffer = new Uint8Array(await image.arrayBuffer());
 
         const sharpImage = sharp(imageBuffer);
         const metadata = await sharpImage.metadata();
 
+        let imageName = image.name;
+
+        if (compress) {
+          imageBuffer = new Uint8Array(
+            await sharpImage
+              .avif({ quality: 75 })
+              .toBuffer(),
+          );
+          imageName = imageName.split(".")[0] + ".avif";
+        }
+
         const [uploadedImage] = await db.insert(galleryImagesTable).values({
           galleryId,
-          fileName: image.name,
+          fileName: imageName,
           height: metadata.height,
           width: metadata.width,
         }).returning({
@@ -221,7 +233,7 @@ app.post(
 
         await uploadFileBuffer({
           buffer: new Uint8Array(imageBuffer),
-          key: `gallery/${access.galleryId}/${image.name}`,
+          key: `gallery/${access.galleryId}/${imageName}`,
         });
 
         uploadedImages.push(uploadedImage);
