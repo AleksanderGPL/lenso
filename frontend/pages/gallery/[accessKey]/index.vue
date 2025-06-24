@@ -25,14 +25,11 @@
       :gap="2"
     >
       <template #default="{ item }">
-        <div class="pointer-events-none">
-          <img
-            :src="getS3Url(`gallery/${data?.gallery.id}/${item.fileName}`)"
-            :width="item.width"
-            :height="item.height"
-            loading="lazy"
-          />
-        </div>
+        <GalleryImage
+          :image="item"
+          :gallery-id="data.gallery.id"
+          :can-download="data.canDownload"
+        />
       </template>
     </masonry-wall>
   </div>

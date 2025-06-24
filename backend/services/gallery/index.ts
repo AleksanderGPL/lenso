@@ -8,7 +8,7 @@ import {
   galleryAccessTable,
   galleryImagesTable,
 } from "@/db/schema.ts";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import {
   accessKeySchema,
   createAccessKeySchema,
@@ -112,7 +112,9 @@ app.get(
       with: {
         gallery: {
           with: {
-            images: true,
+            images: {
+              orderBy: asc(galleryImagesTable.id),
+            },
           },
         },
       },

@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { db } from "@/db/index.ts";
-import { eq } from "drizzle-orm";
-import { galleryAccessKeyTable } from "@/db/schema.ts";
+import { asc, eq } from "drizzle-orm";
+import { galleryAccessKeyTable, galleryImagesTable } from "@/db/schema.ts";
 import { rateLimit } from "@/middleware/ratelimit.ts";
 import { accessKeySchema } from "@/schema/services/gallery.ts";
 
@@ -33,6 +33,7 @@ app.get(
                 height: true,
                 width: true,
               },
+              orderBy: asc(galleryImagesTable.id),
             },
           },
           columns: {
