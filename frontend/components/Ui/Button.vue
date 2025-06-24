@@ -11,14 +11,15 @@
         variant
       ),
       'border border-neutral-700': variant === 'outline',
-      'bg-red-500 hover:bg-red-600': variant === 'danger'
+      'bg-red-500 hover:bg-red-600': variant === 'danger',
+      'bg-white hover:bg-neutral-200': variant === 'light'
     }"
     :disabled="loading || disabled"
     v-bind="$attrs"
   >
     <Transition name="fade" mode="out-in">
       <UiLoader v-if="loading" :size="1" variant="white" />
-      <Icon v-else-if="icon" :key="icon" :name="icon" />
+      <Icon v-else-if="icon" :key="icon" :name="icon" :class="iconClass" />
     </Transition>
     <slot />
   </component>
@@ -29,15 +30,17 @@ withDefaults(
   defineProps<{
     as?: string | Component;
     icon?: string;
+    iconClass?: string;
     loading?: boolean;
     disabled?: boolean;
     size?: 'small' | 'medium' | 'large';
-    variant?: 'default' | 'outline' | 'danger';
+    variant?: 'default' | 'outline' | 'danger' | 'light';
     square?: boolean;
   }>(),
   {
     as: 'button',
     icon: undefined,
+    iconClass: undefined,
     loading: false,
     disabled: false,
     size: 'medium',

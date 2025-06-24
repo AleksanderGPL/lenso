@@ -43,6 +43,8 @@
           :images="data.gallery.images"
           :gallery-id="data.gallery.id"
           :current-image="currentImage"
+          @image:update="currentImage = $event"
+          @close="isLightBoxOpen = false"
         />
       </Transition>
     </Teleport>
