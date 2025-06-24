@@ -29,9 +29,23 @@
           :image="item"
           :gallery-id="data.gallery.id"
           :can-download="data.canDownload"
+          @image:click="
+            currentImage = data.gallery.images.indexOf(item);
+            isLightBoxOpen = true;
+          "
         />
       </template>
     </masonry-wall>
+    <Teleport to="body">
+      <Transition name="fade" mode="out-in">
+        <GalleryLightBox
+          v-if="isLightBoxOpen"
+          :images="data.gallery.images"
+          :gallery-id="data.gallery.id"
+          :current-image="currentImage"
+        />
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -39,6 +53,8 @@
 import type { Gallery } from '~/types/gallery';
 
 const { accessKey } = useRoute().params;
+const isLightBoxOpen = ref(false);
+const currentImage = ref(0);
 
 const api = useApi();
 const { data } = useAsyncData<{ canDownload: boolean; gallery: Gallery }>(
