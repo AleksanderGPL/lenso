@@ -22,10 +22,12 @@
       </button>
     </div>
     <div
-      class="h-full w-full absolute top-0 left-0"
+      class="h-full w-full absolute top-0 left-0 sm:block hidden z-9"
       @click="emit('image:click')"
     ></div>
+    <div class="h-full w-full absolute top-0 left-0 z-8"></div>
     <img
+      class="z-7"
       :src="imageUrl"
       :width="image.width"
       :height="image.height"

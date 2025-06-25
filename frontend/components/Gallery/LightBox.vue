@@ -1,5 +1,7 @@
 <template>
-  <div class="fixed top-0 left-0 w-full h-full bg-black/50 z-50">
+  <div
+    class="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-sm z-50"
+  >
     <div class="flex flex-col h-full w-full">
       <div class="h-1/12 flex p-2 justify-end">
         <UiButton
@@ -24,7 +26,7 @@
           />
         </div>
         <div class="h-full w-full flex justify-center items-center">
-          <Transition name="image" mode="out-in">
+          <Transition :name="transition" mode="out-in">
             <img
               :key="images[currentImage].fileName"
               class="object-contain w-auto h-full shadow-2xl"
@@ -50,10 +52,30 @@
         </div>
       </div>
       <div class="h-1/12 flex flex-col p-1 justify-center items-center">
-        <small>{{ currentImage + 1 }} / {{ images.length }}</small>
-        <small>{{ images[currentImage].fileName }}</small>
+        <small :key="currentImage"
+          >{{ currentImage + 1 }} / {{ images.length }}</small
+        >
+        <small :key="images[currentImage].fileName">{{
+          images[currentImage].fileName
+        }}</small>
       </div>
     </div>
+
+    <!-- Preload previous and next image -->
+    <img
+      v-if="currentImage > 0"
+      class="hidden"
+      :src="
+        getS3Url(`gallery/${galleryId}/${images[currentImage - 1].fileName}`)
+      "
+    />
+    <img
+      v-if="currentImage < images.length - 1"
+      class="hidden"
+      :src="
+        getS3Url(`gallery/${galleryId}/${images[currentImage + 1].fileName}`)
+      "
+    />
   </div>
 </template>
 
@@ -67,15 +89,18 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(['image:update', 'close']);
+const transition = ref('');
 
 function nextImage() {
   if (props.currentImage < props.images.length - 1) {
+    transition.value = 'slide-next';
     emit('image:update', props.currentImage + 1);
   }
 }
 
 function prevImage() {
   if (props.currentImage > 0) {
+    transition.value = 'slide-prev';
     emit('image:update', props.currentImage - 1);
   }
 }
@@ -100,18 +125,34 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.image-enter-active,
-.image-leave-active {
+.slide-next-enter-active,
+.slide-next-leave-active {
   transition: all 0.2s ease-in-out;
 }
 
-.image-enter-from {
+.slide-next-enter-from {
   transform: translateX(20px);
   filter: blur(2px);
   opacity: 0;
 }
-.image-leave-to {
+.slide-next-leave-to {
   transform: translateX(-20px);
+  filter: blur(2px);
+  opacity: 0;
+}
+
+.slide-prev-enter-active,
+.slide-prev-leave-active {
+  transition: all 0.2s ease-in-out;
+}
+
+.slide-prev-enter-from {
+  transform: translateX(-20px);
+  filter: blur(2px);
+  opacity: 0;
+}
+.slide-prev-leave-to {
+  transform: translateX(20px);
   filter: blur(2px);
   opacity: 0;
 }
