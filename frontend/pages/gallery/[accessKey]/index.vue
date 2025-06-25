@@ -11,9 +11,11 @@
         "
       />
       <div
-        class="absolute bottom-2 left-2 bg-black/50 px-2 py-1 rounded-xl backdrop-blur-lg"
+        class="absolute bottom-2 left-2 mr-2 bg-black/50 sm:px-6 sm:py-3 px-4 py-2 rounded-xl backdrop-blur-lg"
       >
-        <h1 class="text-6xl font-semibold">{{ data.gallery.name }}</h1>
+        <h1 class="sm:text-6xl text-4xl font-semibold break-words">
+          {{ data.gallery.name }}
+        </h1>
       </div>
     </div>
     <masonry-wall
@@ -53,17 +55,74 @@
 
 <script setup lang="ts">
 import type { Gallery } from '~/types/gallery';
+import type { Image } from '~/types/image';
 
 const { accessKey } = useRoute().params;
 const isLightBoxOpen = ref(false);
+const isLoadingMore = ref(false);
+const allImagesLoaded = ref(false);
+const PAGE_SIZE = 50;
 const currentImage = ref(0);
 
 const api = useApi();
-const { data } = useAsyncData<{ canDownload: boolean; gallery: Gallery }>(
-  `gallery-access-${accessKey}`,
-  async () => {
-    const response = await api.get(`/gallery/access/${accessKey}`);
-    return response.data;
+
+interface ApiResponse {
+  canDownload: boolean;
+  gallery: Gallery;
+}
+
+const { data } = useAsyncData(`gallery-access-${accessKey}`, async () => {
+  const response = await api.get<ApiResponse>(`/gallery/access/${accessKey}`);
+  return response.data;
+});
+
+async function loadMore() {
+  if (!data.value) {
+    return;
   }
-);
+
+  isLoadingMore.value = true;
+
+  try {
+    const response = await api.get<Image[]>(
+      `/gallery/access/${accessKey}/images`,
+      {
+        params: {
+          offset: data.value.gallery.images.length,
+          limit: PAGE_SIZE
+        }
+      }
+    );
+
+    data.value.gallery.images = [
+      ...data.value.gallery.images,
+      ...response.data
+    ];
+
+    if (response.data.length < PAGE_SIZE) {
+      allImagesLoaded.value = true;
+    }
+  } finally {
+    isLoadingMore.value = false;
+  }
+}
+
+function handleScroll() {
+  if (data.value && !isLoadingMore.value && !allImagesLoaded.value) {
+    const distanceToBottom =
+      document.documentElement.scrollHeight -
+      (window.scrollY + window.innerHeight);
+    if (distanceToBottom < window.innerHeight) {
+      loadMore();
+    }
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 </script>
