@@ -22,6 +22,7 @@ app.get(
       where: eq(galleryAccessKeyTable.accessKey, accessKey),
       columns: {
         canDownload: true,
+        canUseCollections: true,
       },
       with: {
         gallery: {

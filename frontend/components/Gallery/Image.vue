@@ -1,8 +1,8 @@
 <template>
   <div class="relative group">
-    <div class="absolute top-2 right-2 flex gap-2 z-10">
+    <div v-if="showPlusButton" class="absolute top-2 right-2 flex gap-2 z-10">
       <TransitionGroup name="icons">
-        <template v-if="isOpen">
+        <template v-if="isPlusMenuOpen">
           <button
             v-for="(button, index) in buttons"
             :key="button.icon"
@@ -15,12 +15,26 @@
       </TransitionGroup>
       <button
         class="bg-black/50 p-2 flex rounded-full backdrop-blur-lg transition-all sm:opacity-0 group-hover:opacity-100 hover:bg-black/70"
-        :class="{ 'rotate-45 sm:opacity-100': isOpen }"
-        @click="isOpen = !isOpen"
+        :class="{ 'rotate-45 sm:opacity-100': isPlusMenuOpen }"
+        @click="isPlusMenuOpen = !isPlusMenuOpen"
       >
         <Icon name="mdi:plus" size="1.25rem" />
       </button>
     </div>
+    <DropdownBasePopup
+      popup-class="right-0 mr-2"
+      :is-open="isCollectionsPopupOpen"
+    >
+      <div class="flex flex-col gap-2">
+        <button
+          v-for="i in 5"
+          :key="i"
+          class="p-2 hover:bg-neutral-800 transition-colors"
+        >
+          Collection {{ i }}
+        </button>
+      </div>
+    </DropdownBasePopup>
     <div
       class="h-full w-full absolute top-0 left-0 sm:block hidden z-9"
       @click="emit('image:click')"
@@ -38,11 +52,13 @@
 
 <script setup lang="ts">
 import type { Image } from '~/types/image';
-const isOpen = ref(false);
+const isPlusMenuOpen = ref(false);
+const isCollectionsPopupOpen = ref(false);
 
 const props = defineProps<{
   image: Image;
   canDownload: boolean;
+  canUseCollections: boolean;
   galleryId: number;
 }>();
 
@@ -52,12 +68,25 @@ const imageUrl = computed(() =>
   getS3Url(`gallery/${props.galleryId}/${props.image.fileName}`)
 );
 
+const showPlusButton = computed(
+  () => props.canDownload || props.canUseCollections
+);
+
 const buttons = computed(() => {
   const buttons = [];
+
   if (props.canDownload) {
     buttons.push({ icon: 'mdi:download', onClick: downloadImage });
   }
-  buttons.push({ icon: 'material-symbols:photo-prints' });
+
+  if (props.canUseCollections) {
+    buttons.push({
+      icon: 'material-symbols:photo-prints',
+      onClick: () =>
+        (isCollectionsPopupOpen.value = !isCollectionsPopupOpen.value)
+    });
+  }
+
   return buttons;
 });
 

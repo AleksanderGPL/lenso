@@ -403,7 +403,7 @@ app.post(
   async (c) => {
     const session = c.get("session");
     const { galleryId } = c.req.valid("param");
-    const { name, canDownload } = c.req.valid("json");
+    const { name, canDownload, canUseCollections } = c.req.valid("json");
 
     const access = await db.query.galleryAccessTable.findFirst({
       where: and(
@@ -431,6 +431,7 @@ app.post(
       galleryId,
       accessKey,
       canDownload,
+      canUseCollections,
     }).returning();
 
     return c.json(insertedKey, 201);

@@ -29,6 +29,7 @@
           :image="item"
           :gallery-id="data.gallery.id"
           :can-download="data.canDownload"
+          :can-use-collections="data.canUseCollections"
           @image:click="
             currentImage = data.gallery.images.indexOf(item);
             isLightBoxOpen = true;
@@ -59,11 +60,12 @@ const isLightBoxOpen = ref(false);
 const currentImage = ref(0);
 
 const api = useApi();
-const { data } = useAsyncData<{ canDownload: boolean; gallery: Gallery }>(
-  `gallery-access-${accessKey}`,
-  async () => {
-    const response = await api.get(`/gallery/access/${accessKey}`);
-    return response.data;
-  }
-);
+const { data } = useAsyncData<{
+  canDownload: boolean;
+  canUseCollections: boolean;
+  gallery: Gallery;
+}>(`gallery-access-${accessKey}`, async () => {
+  const response = await api.get(`/gallery/access/${accessKey}`);
+  return response.data;
+});
 </script>
