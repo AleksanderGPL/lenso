@@ -28,6 +28,7 @@
         <GalleryImage
           :image="item"
           :gallery-id="data.gallery.id"
+          :collections="data.gallery.collections"
           :can-download="data.canDownload"
           :can-use-collections="data.canUseCollections"
           @image:click="
@@ -42,6 +43,7 @@
         <GalleryLightBox
           v-if="isLightBoxOpen"
           :images="data.gallery.images"
+          :collections="data.gallery.collections"
           :gallery-id="data.gallery.id"
           :current-image="currentImage"
           @image:update="currentImage = $event"

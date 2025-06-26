@@ -1,3 +1,4 @@
+import type { Collection } from './collection';
 import type { Image } from './image';
 
 export interface Gallery {
@@ -5,4 +6,5 @@ export interface Gallery {
   name: string;
   description: string;
   images: Image[];
+  collections: Collection[];
 }

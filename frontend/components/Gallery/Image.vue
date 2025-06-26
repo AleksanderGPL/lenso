@@ -27,11 +27,11 @@
     >
       <div class="flex flex-col gap-2">
         <button
-          v-for="i in 5"
-          :key="i"
+          v-for="collection in collections"
+          :key="collection.id"
           class="p-2 hover:bg-neutral-800 transition-colors"
         >
-          Collection {{ i }}
+          {{ collection.name }}
         </button>
       </div>
     </DropdownBasePopup>
@@ -41,7 +41,7 @@
     ></div>
     <div class="h-full w-full absolute top-0 left-0 z-8"></div>
     <img
-      class="z-7"
+      class="z-7 pointer-events-none"
       :src="imageUrl"
       :width="image.width"
       :height="image.height"
@@ -51,12 +51,15 @@
 </template>
 
 <script setup lang="ts">
+import type { Collection } from '~/types/collection';
 import type { Image } from '~/types/image';
+
 const isPlusMenuOpen = ref(false);
 const isCollectionsPopupOpen = ref(false);
 
 const props = defineProps<{
   image: Image;
+  collections: Collection[];
   canDownload: boolean;
   canUseCollections: boolean;
   galleryId: number;
@@ -79,7 +82,7 @@ const buttons = computed(() => {
     buttons.push({ icon: 'mdi:download', onClick: downloadImage });
   }
 
-  if (props.canUseCollections) {
+  if (props.canUseCollections && props.collections) {
     buttons.push({
       icon: 'material-symbols:photo-prints',
       onClick: () =>
