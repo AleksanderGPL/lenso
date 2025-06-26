@@ -37,3 +37,11 @@ export const createAccessKeySchema = z.object({
   canDownload: z.boolean(),
   canUseCollections: z.boolean(),
 });
+
+export const createCollectionSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters long").max(
+    256,
+    "Name must be at most 256 characters long",
+  ),
+  isShared: z.boolean(),
+});

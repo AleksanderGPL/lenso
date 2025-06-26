@@ -92,6 +92,11 @@ const options = computed(() => {
         name: 'Images',
         icon: 'mdi:image',
         to: `/dash/gallery/${route.params.galleryId}/images`
+      },
+      {
+        name: 'Collections',
+        icon: 'mdi:folder',
+        to: `/dash/gallery/${route.params.galleryId}/collections`
       }
     ];
   }

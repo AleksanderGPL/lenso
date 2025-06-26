@@ -8,16 +8,9 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import {
-  GALLERY_ACCESS_LEVELS,
-  GALLERY_COLLECTION_MODES,
-} from "../utils/global.ts";
+import { GALLERY_ACCESS_LEVELS } from "../utils/global.ts";
 
 export const accessLevels = pgEnum("access_levels", GALLERY_ACCESS_LEVELS);
-export const collectionModes = pgEnum(
-  "collection_modes",
-  GALLERY_COLLECTION_MODES,
-);
 
 export const plansTable = pgTable("plans", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -75,6 +68,7 @@ export const galleriesRelations = relations(
   ({ many }) => ({
     images: many(galleryImagesTable),
     accessKeys: many(galleryAccessKeyTable),
+    collections: many(galleryCollectionsTable),
   }),
 );
 
@@ -145,12 +139,22 @@ export const galleryAccessKeyRelations = relations(
   }),
 );
 
-export const gallerySelectionsTable = pgTable("gallery_collections", {
+export const galleryCollectionsTable = pgTable("gallery_collections", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   galleryId: integer()
     .notNull()
     .references(() => galleriesTable.id, { onDelete: "cascade" }),
   name: text().notNull(),
-  mode: collectionModes().notNull(),
+  isShared: boolean().notNull(),
   createdAt: timestamp().notNull().defaultNow(),
 });
+
+export const galleryCollectionsRelations = relations(
+  galleryCollectionsTable,
+  ({ one }) => ({
+    gallery: one(galleriesTable, {
+      fields: [galleryCollectionsTable.galleryId],
+      references: [galleriesTable.id],
+    }),
+  }),
+);
