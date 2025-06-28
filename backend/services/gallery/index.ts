@@ -6,14 +6,12 @@ import {
   galleriesTable,
   galleryAccessKeyTable,
   galleryAccessTable,
-  galleryCollectionsTable,
   galleryImagesTable,
 } from "@/db/schema.ts";
 import { and, asc, eq } from "drizzle-orm";
 import {
   accessKeySchema,
   createAccessKeySchema,
-  createCollectionSchema,
   createOrModifyGallerySchema,
   galleryByIdSchema,
   imageByIdSchema,
@@ -24,6 +22,7 @@ import { deleteFile, uploadFileBuffer } from "@/utils/s3.ts";
 import sharp from "sharp";
 import { generateUniqueAccessKey } from "@/utils/generate.ts";
 import access from "./access.ts";
+import registerCollectionRoutes from "./collection.ts";
 
 const app = new Hono();
 
@@ -129,44 +128,6 @@ app.get(
     }
 
     return c.json(access.gallery.images);
-  },
-);
-
-app.get(
-  "/:galleryId/collections",
-  authRequired,
-  rateLimit({
-    windowMs: 60 * 1000,
-    limit: 50,
-  }),
-  zValidator("param", galleryByIdSchema),
-  async (c) => {
-    const session = c.get("session");
-    const { galleryId } = c.req.valid("param");
-
-    const access = await db.query.galleryAccessTable.findFirst({
-      where: and(
-        eq(galleryAccessTable.userId, session.user.id),
-        eq(galleryAccessTable.galleryId, galleryId),
-      ),
-      with: {
-        gallery: {
-          with: {
-            collections: {
-              orderBy: asc(galleryCollectionsTable.id),
-            },
-          },
-        },
-      },
-    });
-
-    if (!access) {
-      return c.json({
-        message: "Gallery not found",
-      }, 404);
-    }
-
-    return c.json(access.gallery.collections);
   },
 );
 
@@ -559,53 +520,6 @@ app.delete(
   },
 );
 
-app.post(
-  "/:galleryId/collection",
-  authRequired,
-  zValidator(
-    "param",
-    galleryByIdSchema,
-  ),
-  zValidator(
-    "json",
-    createCollectionSchema,
-  ),
-  rateLimit({
-    windowMs: 60 * 1000,
-    limit: 50,
-  }),
-  async (c) => {
-    const session = c.get("session");
-    const { galleryId } = c.req.valid("param");
-    const { name, isShared } = c.req.valid("json");
-
-    const access = await db.query.galleryAccessTable.findFirst({
-      where: and(
-        eq(galleryAccessTable.userId, session.user.id),
-        eq(galleryAccessTable.galleryId, galleryId),
-      ),
-    });
-
-    if (!access) {
-      return c.json({
-        message: "Gallery not found",
-      }, 404);
-    }
-
-    if (!["OWNER", "EDITOR"].includes(access.accessLevel)) {
-      return c.json({
-        message: "You do not have permission to modify this gallery",
-      }, 403);
-    }
-
-    const [collection] = await db.insert(galleryCollectionsTable).values({
-      galleryId,
-      name,
-      isShared,
-    }).returning();
-
-    return c.json(collection, 201);
-  },
-);
+registerCollectionRoutes(app);
 
 export default app;
