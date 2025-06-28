@@ -18,7 +18,11 @@
       </p>
     </form>
     <template #footer>
-      <UiButton size="small" icon="mdi:plus" @click="handleSubmit"
+      <UiButton
+        size="small"
+        icon="mdi:plus"
+        :loading="isLoading"
+        @click="handleSubmit"
         >Create</UiButton
       >
     </template>
@@ -29,7 +33,8 @@
 import { createOrModifyGallerySchema } from '@/schema/services/gallery';
 
 const api = useApi();
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'add']);
+const isLoading = ref(false);
 const error = ref('');
 
 const formData = ref({
@@ -38,13 +43,20 @@ const formData = ref({
 });
 
 async function handleSubmit() {
-  const validation = validate(createOrModifyGallerySchema, formData.value);
+  try {
+    isLoading.value = true;
+    const validation = validate(createOrModifyGallerySchema, formData.value);
 
-  if (validation) {
-    error.value = validation;
-    return;
+    if (validation) {
+      error.value = validation;
+      throw new Error(validation);
+    }
+
+    const response = await api.post('/gallery', formData.value);
+    emit('close');
+    emit('add', response.data);
+  } finally {
+    isLoading.value = false;
   }
-
-  await api.post('/gallery', formData.value);
 }
 </script>

@@ -11,7 +11,13 @@
       >
     </div>
     <div v-if="collections" class="flex flex-col gap-2">
-      <UiCard v-for="collection in collections" :key="collection.id">
+      <UiCard
+        v-for="collection in collections"
+        :key="collection.id"
+        class="hover:bg-neutral-700 transition-colors cursor-pointer"
+        :as="NuxtLink"
+        :to="`/dash/gallery/${galleryId}/collection/${collection.id}`"
+      >
         <p>{{ collection.name }}</p>
       </UiCard>
     </div>
@@ -29,6 +35,7 @@
 
 <script setup lang="ts">
 import type { Collection } from '~/types/collection';
+import { NuxtLink } from '#components';
 
 definePageMeta({
   layout: 'dashboard',

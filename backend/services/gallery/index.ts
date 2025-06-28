@@ -366,17 +366,20 @@ app.post(
     const [gallery] = await db.insert(galleriesTable).values({
       name,
       description,
-    }).returning({
-      id: galleriesTable.id,
-    });
+    }).returning();
 
-    await db.insert(galleryAccessTable).values({
+    const [access] = await db.insert(galleryAccessTable).values({
       galleryId: gallery.id,
       userId: session.user.id,
       accessLevel: "OWNER",
+    }).returning({
+      id: galleryAccessTable.id,
     });
 
-    return c.json({ message: "Gallery created successfully" }, 201);
+    return c.json({
+      id: access.id,
+      gallery,
+    }, 201);
   },
 );
 
