@@ -26,6 +26,29 @@ app.get(
 
     const collection = await db.query.galleryCollectionsTable.findFirst({
       where: eq(galleryCollectionsTable.id, collectionId),
+      columns: {
+        name: true,
+        galleryId: true,
+      },
+      with: {
+        images: {
+          columns: {
+            collectionId: false,
+            imageId: false,
+            id: false,
+          },
+          with: {
+            image: {
+              columns: {
+                id: true,
+                fileName: true,
+                width: true,
+                height: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!collection) {
