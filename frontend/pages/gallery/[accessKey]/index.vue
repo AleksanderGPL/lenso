@@ -27,6 +27,7 @@
       <template #default="{ item }">
         <GalleryImage
           :image="item"
+          :access-key="accessKey as string"
           :gallery-id="data.gallery.id"
           :collections="data.gallery.collections"
           :can-download="data.canDownload"

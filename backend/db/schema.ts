@@ -109,11 +109,12 @@ export const galleryImagesTable = pgTable("gallery_images", {
 
 export const galleryImagesRelations = relations(
   galleryImagesTable,
-  ({ one }) => ({
+  ({ one, many }) => ({
     gallery: one(galleriesTable, {
       fields: [galleryImagesTable.galleryId],
       references: [galleriesTable.id],
     }),
+    collections: many(galleryCollectionsImagesTable),
   }),
 );
 
@@ -151,10 +152,41 @@ export const galleryCollectionsTable = pgTable("gallery_collections", {
 
 export const galleryCollectionsRelations = relations(
   galleryCollectionsTable,
-  ({ one }) => ({
+  ({ one, many }) => ({
     gallery: one(galleriesTable, {
       fields: [galleryCollectionsTable.galleryId],
       references: [galleriesTable.id],
+    }),
+    images: many(galleryCollectionsImagesTable),
+  }),
+);
+
+export const galleryCollectionsImagesTable = pgTable(
+  "gallery_collections_images",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    collectionId: integer()
+      .notNull()
+      .references(() => galleryCollectionsTable.id, { onDelete: "cascade" }),
+    imageId: integer()
+      .notNull()
+      .references(() => galleryImagesTable.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    unique().on(t.collectionId, t.imageId),
+  ],
+);
+
+export const galleryCollectionsImagesRelations = relations(
+  galleryCollectionsImagesTable,
+  ({ one }) => ({
+    collection: one(galleryCollectionsTable, {
+      fields: [galleryCollectionsImagesTable.collectionId],
+      references: [galleryCollectionsTable.id],
+    }),
+    image: one(galleryImagesTable, {
+      fields: [galleryCollectionsImagesTable.imageId],
+      references: [galleryImagesTable.id],
     }),
   }),
 );

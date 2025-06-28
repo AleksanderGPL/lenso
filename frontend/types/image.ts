@@ -4,4 +4,7 @@ export interface Image {
   fileName: string;
   height: number;
   width: number;
+  collections: {
+    collectionId: number;
+  }[];
 }

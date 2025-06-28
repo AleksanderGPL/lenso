@@ -49,21 +49,19 @@
             v-for="collection in collections"
             :key="collection.id"
             class="p-2 hover:bg-neutral-800 transition-colors flex items-center gap-2"
-            @click="
-              collectionIds.includes(collection.id)
-                ? collectionIds.splice(collectionIds.indexOf(collection.id), 1)
-                : collectionIds.push(collection.id)
-            "
+            @click="addToCollection(collection.id)"
           >
             <Transition name="fade" mode="out-in">
               <Icon
                 :key="
-                  collectionIds.includes(collection.id)
-                    ? 'checked'
-                    : 'unchecked'
+                  image.collections.find(
+                    (c) => c.collectionId === collection.id
+                  )?.collectionId
                 "
                 :name="
-                  collectionIds.includes(collection.id)
+                  image.collections.find(
+                    (c) => c.collectionId === collection.id
+                  )
                     ? 'mdi:check'
                     : 'mdi:checkbox-blank-outline'
                 "
@@ -95,9 +93,6 @@ import type { Collection } from '~/types/collection';
 import type { Image } from '~/types/image';
 
 const isPlusMenuOpen = ref(false);
-
-// TODO: Replace collection adding is ready
-const collectionIds = ref<number[]>([]);
 const isCollectionsPopupOpen = ref(false);
 
 const props = defineProps<{
@@ -106,8 +101,10 @@ const props = defineProps<{
   canDownload: boolean;
   canUseCollections: boolean;
   galleryId: number;
+  accessKey: string;
 }>();
 
+const api = useApi();
 const emit = defineEmits(['image:click']);
 
 const imageUrl = computed(() =>
@@ -138,6 +135,12 @@ const buttons = computed(() => {
 
 function downloadImage() {
   window.open(imageUrl.value, '_blank');
+}
+
+async function addToCollection(id: number) {
+  await api.post(`/gallery/access/${props.accessKey}/collection/${id}`, {
+    imageId: props.image.id
+  });
 }
 </script>
 
