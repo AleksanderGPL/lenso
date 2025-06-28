@@ -65,6 +65,11 @@
                     ? 'mdi:check'
                     : 'mdi:checkbox-blank-outline'
                 "
+                class="transition-colors"
+                :class="{
+                  'text-green-500': pendingAdd.includes(collection.id),
+                  'text-red-500': pendingRemove.includes(collection.id)
+                }"
                 size="1.25rem"
               />
             </Transition>
@@ -110,6 +115,8 @@ const emit = defineEmits([
   'collection:remove',
   'collection:add'
 ]);
+const pendingAdd = ref<number[]>([]);
+const pendingRemove = ref<number[]>([]);
 
 const imageUrl = computed(() =>
   getS3Url(`gallery/${props.galleryId}/${props.image.fileName}`)
@@ -143,17 +150,31 @@ function downloadImage() {
 
 async function toggleCollection(id: number) {
   if (props.image.collections.find((c) => c.collectionId === id)) {
-    await api.delete(`/gallery/access/${props.accessKey}/collection/${id}`, {
-      data: {
-        imageId: props.image.id
-      }
-    });
-    emit('collection:remove', id);
+    try {
+      pendingRemove.value.push(id);
+
+      await api.delete(`/gallery/access/${props.accessKey}/collection/${id}`, {
+        data: {
+          imageId: props.image.id
+        }
+      });
+
+      emit('collection:remove', id);
+    } finally {
+      pendingRemove.value = pendingRemove.value.filter((c) => c !== id);
+    }
   } else {
-    await api.post(`/gallery/access/${props.accessKey}/collection/${id}`, {
-      imageId: props.image.id
-    });
-    emit('collection:add', id);
+    try {
+      pendingAdd.value.push(id);
+
+      await api.post(`/gallery/access/${props.accessKey}/collection/${id}`, {
+        imageId: props.image.id
+      });
+
+      emit('collection:add', id);
+    } finally {
+      pendingAdd.value = pendingAdd.value.filter((c) => c !== id);
+    }
   }
 }
 </script>
