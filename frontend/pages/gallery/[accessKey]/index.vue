@@ -36,6 +36,12 @@
             currentImage = data.gallery.images.indexOf(item);
             isLightBoxOpen = true;
           "
+          @collection:add="item.collections.push({ collectionId: $event })"
+          @collection:remove="
+            item.collections = item.collections.filter(
+              (c) => c.collectionId !== $event
+            )
+          "
         />
       </template>
     </masonry-wall>

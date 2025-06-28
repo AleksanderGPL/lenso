@@ -49,7 +49,7 @@
             v-for="collection in collections"
             :key="collection.id"
             class="p-2 hover:bg-neutral-800 transition-colors flex items-center gap-2"
-            @click="addToCollection(collection.id)"
+            @click="toggleCollection(collection.id)"
           >
             <Transition name="fade" mode="out-in">
               <Icon
@@ -105,7 +105,11 @@ const props = defineProps<{
 }>();
 
 const api = useApi();
-const emit = defineEmits(['image:click']);
+const emit = defineEmits([
+  'image:click',
+  'collection:remove',
+  'collection:add'
+]);
 
 const imageUrl = computed(() =>
   getS3Url(`gallery/${props.galleryId}/${props.image.fileName}`)
@@ -137,10 +141,20 @@ function downloadImage() {
   window.open(imageUrl.value, '_blank');
 }
 
-async function addToCollection(id: number) {
-  await api.post(`/gallery/access/${props.accessKey}/collection/${id}`, {
-    imageId: props.image.id
-  });
+async function toggleCollection(id: number) {
+  if (props.image.collections.find((c) => c.collectionId === id)) {
+    await api.delete(`/gallery/access/${props.accessKey}/collection/${id}`, {
+      data: {
+        imageId: props.image.id
+      }
+    });
+    emit('collection:remove', id);
+  } else {
+    await api.post(`/gallery/access/${props.accessKey}/collection/${id}`, {
+      imageId: props.image.id
+    });
+    emit('collection:add', id);
+  }
 }
 </script>
 
