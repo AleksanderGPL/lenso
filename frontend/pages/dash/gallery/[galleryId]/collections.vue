@@ -10,7 +10,11 @@
         >Add collection</UiButton
       >
     </div>
-    {{ collections }}
+    <div v-if="collections" class="flex flex-col gap-2">
+      <UiCard v-for="collection in collections" :key="collection.id">
+        <p>{{ collection.name }}</p>
+      </UiCard>
+    </div>
     <Teleport to="body">
       <Transition name="fade" mode="out-in">
         <ModalAddCollection

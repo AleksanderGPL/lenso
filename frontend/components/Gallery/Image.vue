@@ -8,8 +8,9 @@
             :key="button.icon"
             class="bg-black/50 p-2 flex rounded-full backdrop-blur-lg hover:bg-black/70 transition-colors"
             :style="{ '--delay': (buttons.length - index - 1) * 0.05 + 's' }"
+            @click.stop="button.onClick"
           >
-            <Icon :name="button.icon" size="1.25rem" @click="button.onClick" />
+            <Icon :name="button.icon" size="1.25rem" />
           </button>
         </template>
       </TransitionGroup>
@@ -21,20 +22,59 @@
         <Icon name="mdi:plus" size="1.25rem" />
       </button>
     </div>
-    <DropdownBasePopup
-      popup-class="right-0 mr-2"
-      :is-open="isCollectionsPopupOpen"
+    <Transition
+      enter-active-class="transition ease-out duration-100"
+      enter-from-class="opacity-0 scale-95"
+      enter-to-class="opacity-100 scale-100"
+      leave-active-class="transition ease-in duration-75"
+      leave-from-class="opacity-100 scale-100"
+      leave-to-class="opacity-0 scale-95"
     >
-      <div class="flex flex-col gap-2">
-        <button
-          v-for="collection in collections"
-          :key="collection.id"
-          class="p-2 hover:bg-neutral-800 transition-colors"
-        >
-          {{ collection.name }}
-        </button>
-      </div>
-    </DropdownBasePopup>
+      <DropdownBasePopup
+        v-if="isCollectionsPopupOpen"
+        popup-class="right-0 mr-2"
+        @update:is-open="isCollectionsPopupOpen = $event"
+      >
+        <div class="flex items-center justify-between p-2">
+          <p class="text-sm text-neutral-400">Collections</p>
+          <UiButton
+            icon="mdi:close"
+            variant="outline"
+            size="small"
+            @click="isCollectionsPopupOpen = false"
+          />
+        </div>
+        <div class="flex flex-col">
+          <button
+            v-for="collection in collections"
+            :key="collection.id"
+            class="p-2 hover:bg-neutral-800 transition-colors flex items-center gap-2"
+            @click="
+              collectionIds.includes(collection.id)
+                ? collectionIds.splice(collectionIds.indexOf(collection.id), 1)
+                : collectionIds.push(collection.id)
+            "
+          >
+            <Transition name="fade" mode="out-in">
+              <Icon
+                :key="
+                  collectionIds.includes(collection.id)
+                    ? 'checked'
+                    : 'unchecked'
+                "
+                :name="
+                  collectionIds.includes(collection.id)
+                    ? 'mdi:check'
+                    : 'mdi:checkbox-blank-outline'
+                "
+                size="1.25rem"
+              />
+            </Transition>
+            <span> {{ collection.name }}</span>
+          </button>
+        </div>
+      </DropdownBasePopup>
+    </Transition>
     <div
       class="h-full w-full absolute top-0 left-0 sm:block hidden z-9"
       @click="emit('image:click')"
@@ -55,6 +95,9 @@ import type { Collection } from '~/types/collection';
 import type { Image } from '~/types/image';
 
 const isPlusMenuOpen = ref(false);
+
+// TODO: Replace collection adding is ready
+const collectionIds = ref<number[]>([]);
 const isCollectionsPopupOpen = ref(false);
 
 const props = defineProps<{
