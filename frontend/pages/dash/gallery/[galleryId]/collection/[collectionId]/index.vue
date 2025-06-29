@@ -55,6 +55,19 @@
         </ModalConfirm>
       </Transition>
     </Teleport>
+    <Teleport to="body">
+      <Transition name="fade" mode="out-in">
+        <ModalCopyNames
+          v-if="isCopyNamesModalOpen"
+          :names="
+            collection?.sharedCollectionImages.map(
+              (image) => image.image.fileName
+            ) ?? []
+          "
+          @close="isCopyNamesModalOpen = false"
+        />
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -70,6 +83,7 @@ definePageMeta({
 const { collectionId } = useRoute().params;
 const isDeleteModalOpen = ref(false);
 const isDeleting = ref(false);
+const isCopyNamesModalOpen = ref(false);
 const api = useApi();
 
 const { data: collection } = useAsyncData<Collection>(
