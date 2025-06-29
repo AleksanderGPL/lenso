@@ -10,6 +10,12 @@ import {
 } from "@/schema/services/gallery.ts";
 import { rateLimit } from "@/middleware/ratelimit.ts";
 
+/**
+ * Registers HTTP routes for managing gallery collections on the provided Hono app instance.
+ *
+ * Adds endpoints to list all collections in a gallery and to create a new collection within a gallery.
+ * Both routes require user authentication and apply rate limiting. The POST route additionally enforces access level checks for modifying collections.
+ */
 export function registerRoutes(app: Hono) {
   app.get(
     "/:galleryId/collections",
