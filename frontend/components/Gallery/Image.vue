@@ -139,7 +139,7 @@ const buttons = computed(() => {
     buttons.push({ icon: 'mdi:download', onClick: downloadImage });
   }
 
-  if (props.canUseCollections && props.collections) {
+  if (props.canUseCollections && props.collections.length > 0) {
     buttons.push({
       icon: 'material-symbols:photo-prints',
       onClick: () =>

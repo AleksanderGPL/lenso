@@ -92,4 +92,47 @@ app.get(
   },
 );
 
+app.delete(
+  "/:collectionId",
+  authRequired,
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
+  zValidator("param", collectionByIdSchema),
+  async (c) => {
+    const session = c.get("session");
+    const { collectionId } = c.req.valid("param");
+
+    const collection = await db.query.galleryCollectionsTable.findFirst({
+      where: eq(galleryCollectionsTable.id, collectionId),
+    });
+
+    if (!collection) {
+      return c.json({
+        message: "Collection not found",
+      }, 404);
+    }
+
+    const access = await db.query.galleryAccessTable.findFirst({
+      where: and(
+        eq(galleryAccessTable.userId, session.user.id),
+        eq(galleryAccessTable.galleryId, collection.galleryId),
+      ),
+    });
+
+    if (!access) {
+      return c.json({
+        message: "You do not have permission to delete this collection",
+      }, 403);
+    }
+
+    await db.delete(galleryCollectionsTable).where(
+      eq(galleryCollectionsTable.id, collectionId),
+    );
+
+    return c.json({ message: "Collection deleted successfully" }, 200);
+  },
+);
+
 export default app;

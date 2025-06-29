@@ -52,6 +52,8 @@ app.get(
                   orderBy: asc(galleryCollectionsTable.id),
                 },
                 privateCollections: {
+                  where: (fields) =>
+                    eq(fields.accessId, galleryAccessKeyTable.id),
                   columns: {
                     collectionId: true,
                   },
@@ -168,6 +170,7 @@ app.post(
           where: and(
             eq(galleryPrivateCollectionsImagesTable.imageId, imageId),
             eq(galleryPrivateCollectionsImagesTable.collectionId, collectionId),
+            eq(galleryPrivateCollectionsImagesTable.accessId, access.id),
           ),
         });
 
