@@ -193,6 +193,10 @@ export const galleryPrivateCollectionsImagesRelations = relations(
       fields: [galleryPrivateCollectionsImagesTable.imageId],
       references: [galleryImagesTable.id],
     }),
+    accessKey: one(galleryAccessKeyTable, {
+      fields: [galleryPrivateCollectionsImagesTable.accessId],
+      references: [galleryAccessKeyTable.id],
+    }),
   }),
 );
 

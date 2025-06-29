@@ -20,4 +20,7 @@ export interface Collection {
       height: number;
     };
   }[];
+  accessKey: {
+    name: string;
+  };
 }

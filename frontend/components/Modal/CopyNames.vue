@@ -26,15 +26,15 @@ const props = defineProps<{
   names: string[];
 }>();
 
-const emit = defineEmits(['cancel', 'confirm']);
+const emit = defineEmits(['cancel']);
 const includeExtension = ref(false);
 const recentlyCopied = ref(false);
 
 const cNames = computed(() => {
   if (includeExtension.value) {
-    return props.names.join();
+    return props.names.join(', ');
   }
-  return props.names.map((name) => name.split('.')[0]).join();
+  return props.names.map((name) => name.split('.')[0]).join(', ');
 });
 
 function copy() {
