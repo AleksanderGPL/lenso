@@ -4,7 +4,10 @@ export interface Image {
   fileName: string;
   height: number;
   width: number;
-  collections: {
+  sharedCollections: {
+    collectionId: number;
+  }[];
+  privateCollections: {
     collectionId: number;
   }[];
 }

@@ -54,12 +54,18 @@
             <Transition name="fade" mode="out-in">
               <Icon
                 :key="
-                  image.collections.find(
+                  image.sharedCollections.find(
+                    (c) => c.collectionId === collection.id
+                  )?.collectionId ||
+                  image.privateCollections.find(
                     (c) => c.collectionId === collection.id
                   )?.collectionId
                 "
                 :name="
-                  image.collections.find(
+                  image.sharedCollections.find(
+                    (c) => c.collectionId === collection.id
+                  ) ||
+                  image.privateCollections.find(
                     (c) => c.collectionId === collection.id
                   )
                     ? 'mdi:check'
@@ -149,7 +155,10 @@ function downloadImage() {
 }
 
 async function toggleCollection(id: number) {
-  if (props.image.collections.find((c) => c.collectionId === id)) {
+  if (
+    props.image.sharedCollections.find((c) => c.collectionId === id) ||
+    props.image.privateCollections.find((c) => c.collectionId === id)
+  ) {
     try {
       pendingRemove.value.push(id);
 

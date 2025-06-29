@@ -36,12 +36,8 @@
             currentImage = data.gallery.images.indexOf(item);
             isLightBoxOpen = true;
           "
-          @collection:add="item.collections.push({ collectionId: $event })"
-          @collection:remove="
-            item.collections = item.collections.filter(
-              (c) => c.collectionId !== $event
-            )
-          "
+          @collection:add="handleAddToCollection(item, $event)"
+          @collection:remove="handleRemoveFromCollection(item, $event)"
         />
       </template>
     </masonry-wall>
@@ -62,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+import type { Image } from '~/types/image';
 import type { Gallery } from '~/types/gallery';
 
 const { accessKey } = useRoute().params;
@@ -77,4 +74,32 @@ const { data } = useAsyncData<{
   const response = await api.get(`/gallery/access/${accessKey}`);
   return response.data;
 });
+
+function handleAddToCollection(image: Image, collectionId: number) {
+  const collection = data.value?.gallery.collections.find(
+    (c) => c.id === collectionId
+  );
+  if (!collection) return;
+  if (collection.isShared) {
+    image.sharedCollections.push({ collectionId });
+  } else {
+    image.privateCollections.push({ collectionId });
+  }
+}
+
+function handleRemoveFromCollection(image: Image, collectionId: number) {
+  const collection = data.value?.gallery.collections.find(
+    (c) => c.id === collectionId
+  );
+  if (!collection) return;
+  if (collection.isShared) {
+    image.sharedCollections = image.sharedCollections.filter(
+      (c) => c.collectionId !== collectionId
+    );
+  } else {
+    image.privateCollections = image.privateCollections.filter(
+      (c) => c.collectionId !== collectionId
+    );
+  }
+}
 </script>
