@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="flex flex-col gap-2">
     <div class="flex items-center justify-between">
       <h2 class="text-xl font-semibold flex items-center justify-center gap-2">
         <span
@@ -16,6 +16,41 @@
         {{ collection?.name }}
       </h2>
       <UiButton @click="isDeleteModalOpen = true">Delete</UiButton>
+    </div>
+    <div v-if="collection?.accessKeys && !pending">
+      <div class="flex flex-col gap-2">
+        <UiCard
+          v-for="accessKey in collection.accessKeys"
+          :key="accessKey.id"
+          class="hover:bg-neutral-700 transition-colors cursor-pointer"
+          :as="NuxtLink"
+          :to="`/dash/gallery/${galleryId}/collection/${collectionId}/access/${accessKey.id}`"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex gap-2 items-center">
+              <div
+                :class="
+                  accessKey.imageCount === '0'
+                    ? 'bg-neutral-700'
+                    : 'bg-yellow-400'
+                "
+                class="w-3 h-3 rounded-full"
+              ></div>
+              <p>{{ accessKey.name }}</p>
+            </div>
+            <p class="text-xs text-neutral-500">
+              {{ accessKey.imageCount }}
+              {{ accessKey.imageCount === '1' ? 'image' : 'images' }}
+            </p>
+          </div>
+        </UiCard>
+        <p
+          v-if="collection.accessKeys?.length === 0"
+          class="text-center text-neutral-500"
+        >
+          No access keys found
+        </p>
+      </div>
     </div>
     <TransitionGroup name="fade">
       <masonry-wall
@@ -72,6 +107,7 @@
 </template>
 
 <script setup lang="ts">
+import { NuxtLink } from '#components';
 import type { Collection } from '~/types/collection';
 
 definePageMeta({
@@ -80,18 +116,19 @@ definePageMeta({
   middleware: 'auth'
 });
 
-const { collectionId } = useRoute().params;
+const { collectionId, galleryId } = useRoute().params;
 const isDeleteModalOpen = ref(false);
 const isDeleting = ref(false);
 const isCopyNamesModalOpen = ref(false);
 const api = useApi();
 
-const { data: collection } = useAsyncData<Collection>(
-  `gallery-${collectionId}-collection`,
-  async () => {
-    return (await api.get(`/collection/${collectionId}`)).data;
+const { data: collection, pending } = useAsyncData<
+  Collection & {
+    accessKeys?: { id: number; name: string; imageCount: string }[];
   }
-);
+>(`gallery-${collectionId}-collection`, async () => {
+  return (await api.get(`/collection/${collectionId}`)).data;
+});
 
 async function deleteCollection() {
   try {

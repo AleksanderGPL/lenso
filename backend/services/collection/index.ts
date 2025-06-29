@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { authRequired } from "@/middleware/auth.ts";
 import { zValidator } from "@hono/zod-validator";
 import { db } from "@/db/index.ts";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import {
   galleryAccessKeyTable,
   galleryAccessTable,
@@ -77,7 +77,33 @@ app.get(
       }, 403);
     }
 
-    return c.json(collection);
+    let accessKeys: { id: number; name: string }[] = [];
+    if (!collection.isShared) {
+      accessKeys = await db.select({
+        id: galleryAccessKeyTable.id,
+        name: galleryAccessKeyTable.name,
+        imageCount:
+          sql`COUNT(${galleryPrivateCollectionsImagesTable.imageId}) FILTER (WHERE ${galleryPrivateCollectionsImagesTable.collectionId} = ${collectionId})`,
+      }).from(galleryAccessKeyTable).where(
+        and(
+          eq(galleryAccessKeyTable.galleryId, collection.galleryId),
+          eq(galleryAccessKeyTable.canUseCollections, true),
+        ),
+      ).leftJoin(
+        galleryPrivateCollectionsImagesTable,
+        eq(
+          galleryPrivateCollectionsImagesTable.accessId,
+          galleryAccessKeyTable.id,
+        ),
+      ).groupBy(galleryAccessKeyTable.id).orderBy(
+        desc(galleryAccessKeyTable.id),
+      );
+    }
+
+    return c.json({
+      ...collection,
+      accessKeys: accessKeys.length > 0 ? accessKeys : undefined,
+    });
   },
 );
 

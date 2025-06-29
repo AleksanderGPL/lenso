@@ -133,11 +133,12 @@ export const galleryAccessKeyTable = pgTable("gallery_access_key", {
 
 export const galleryAccessKeyRelations = relations(
   galleryAccessKeyTable,
-  ({ one }) => ({
+  ({ one, many }) => ({
     gallery: one(galleriesTable, {
       fields: [galleryAccessKeyTable.galleryId],
       references: [galleriesTable.id],
     }),
+    privateCollectionImages: many(galleryPrivateCollectionsImagesTable),
   }),
 );
 

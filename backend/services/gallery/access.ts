@@ -31,6 +31,7 @@ app.get(
     const access = await db.query.galleryAccessKeyTable.findFirst({
       where: eq(galleryAccessKeyTable.accessKey, accessKey),
       columns: {
+        id: true,
         canDownload: true,
         canUseCollections: true,
       },
@@ -46,14 +47,6 @@ app.get(
               },
               with: {
                 sharedCollections: {
-                  columns: {
-                    collectionId: true,
-                  },
-                  orderBy: asc(galleryCollectionsTable.id),
-                },
-                privateCollections: {
-                  where: (fields) =>
-                    eq(fields.accessId, galleryAccessKeyTable.id),
                   columns: {
                     collectionId: true,
                   },
@@ -84,6 +77,36 @@ app.get(
       return c.json({
         message: "Access key not found",
       }, 404);
+    }
+
+    const privateCollections = await db.query
+      .galleryPrivateCollectionsImagesTable.findMany({
+        where: eq(galleryPrivateCollectionsImagesTable.accessId, access.id),
+        columns: {
+          imageId: true,
+          collectionId: true,
+        },
+        orderBy: asc(galleryPrivateCollectionsImagesTable.collectionId),
+      });
+
+    const privateCollectionsMap = new Map<
+      number,
+      Array<{ collectionId: number }>
+    >();
+    privateCollections.forEach((pc) => {
+      if (!privateCollectionsMap.has(pc.imageId)) {
+        privateCollectionsMap.set(pc.imageId, []);
+      }
+      privateCollectionsMap.get(pc.imageId)?.push({
+        collectionId: pc.collectionId,
+      });
+    });
+
+    if (access.gallery.images) {
+      access.gallery.images = access.gallery.images.map((image) => ({
+        ...image,
+        privateCollections: privateCollectionsMap.get(image.id) || [],
+      }));
     }
 
     return c.json(access);
@@ -255,6 +278,7 @@ app.delete(
       await db.delete(galleryPrivateCollectionsImagesTable).where(and(
         eq(galleryPrivateCollectionsImagesTable.imageId, imageId),
         eq(galleryPrivateCollectionsImagesTable.collectionId, collectionId),
+        eq(galleryPrivateCollectionsImagesTable.accessId, access.id),
       ));
     }
 
