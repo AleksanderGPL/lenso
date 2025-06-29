@@ -4,9 +4,10 @@ import { db } from "@/db/index.ts";
 import { and, asc, eq } from "drizzle-orm";
 import {
   galleryAccessKeyTable,
-  galleryCollectionsImagesTable,
   galleryCollectionsTable,
   galleryImagesTable,
+  galleryPrivateCollectionsImagesTable,
+  gallerySharedCollectionsImagesTable,
 } from "@/db/schema.ts";
 import { rateLimit } from "@/middleware/ratelimit.ts";
 import {
@@ -44,10 +45,17 @@ app.get(
                 width: true,
               },
               with: {
-                collections: {
+                sharedCollections: {
                   columns: {
                     collectionId: true,
                   },
+                  orderBy: asc(galleryCollectionsTable.id),
+                },
+                privateCollections: {
+                  columns: {
+                    collectionId: true,
+                  },
+                  orderBy: asc(galleryCollectionsTable.id),
                 },
               },
               orderBy: asc(galleryImagesTable.id),
@@ -135,24 +143,46 @@ app.post(
       }, 403);
     }
 
-    const existingImage = await db.query.galleryCollectionsImagesTable
-      .findFirst({
-        where: and(
-          eq(galleryCollectionsImagesTable.imageId, imageId),
-          eq(galleryCollectionsImagesTable.collectionId, collectionId),
-        ),
+    if (collection.isShared) {
+      const existingImage = await db.query.gallerySharedCollectionsImagesTable
+        .findFirst({
+          where: and(
+            eq(gallerySharedCollectionsImagesTable.imageId, imageId),
+            eq(gallerySharedCollectionsImagesTable.collectionId, collectionId),
+          ),
+        });
+
+      if (existingImage) {
+        return c.json({
+          message: "This image is already in this collection",
+        }, 400);
+      }
+
+      await db.insert(gallerySharedCollectionsImagesTable).values({
+        collectionId,
+        imageId,
       });
+    } else {
+      const existingImage = await db.query.galleryPrivateCollectionsImagesTable
+        .findFirst({
+          where: and(
+            eq(galleryPrivateCollectionsImagesTable.imageId, imageId),
+            eq(galleryPrivateCollectionsImagesTable.collectionId, collectionId),
+          ),
+        });
 
-    if (existingImage) {
-      return c.json({
-        message: "This image is already in this collection",
-      }, 400);
+      if (existingImage) {
+        return c.json({
+          message: "This image is already in this collection",
+        }, 400);
+      }
+
+      await db.insert(galleryPrivateCollectionsImagesTable).values({
+        collectionId,
+        imageId,
+        accessId: access.id,
+      });
     }
-
-    await db.insert(galleryCollectionsImagesTable).values({
-      collectionId,
-      imageId,
-    });
 
     return c.json({ message: "Image added to collection" }, 200);
   },
@@ -197,23 +227,33 @@ app.delete(
       }, 403);
     }
 
-    const image = await db.query.galleryCollectionsImagesTable.findFirst({
-      where: and(
-        eq(galleryCollectionsImagesTable.imageId, imageId),
-        eq(galleryCollectionsImagesTable.collectionId, collectionId),
-      ),
+    const collection = await db.query.galleryCollectionsTable.findFirst({
+      where: eq(galleryCollectionsTable.id, collectionId),
     });
 
-    if (!image) {
+    if (!collection) {
       return c.json({
-        message: "Image not found",
+        message: "Collection not found",
       }, 404);
     }
 
-    await db.delete(galleryCollectionsImagesTable).where(and(
-      eq(galleryCollectionsImagesTable.imageId, imageId),
-      eq(galleryCollectionsImagesTable.collectionId, collectionId),
-    ));
+    if (collection.galleryId !== access.galleryId) {
+      return c.json({
+        message: "You do not have permission to use this collection",
+      }, 403);
+    }
+
+    if (collection.isShared) {
+      await db.delete(gallerySharedCollectionsImagesTable).where(and(
+        eq(gallerySharedCollectionsImagesTable.imageId, imageId),
+        eq(gallerySharedCollectionsImagesTable.collectionId, collectionId),
+      ));
+    } else {
+      await db.delete(galleryPrivateCollectionsImagesTable).where(and(
+        eq(galleryPrivateCollectionsImagesTable.imageId, imageId),
+        eq(galleryPrivateCollectionsImagesTable.collectionId, collectionId),
+      ));
+    }
 
     return c.json({ message: "Image removed from collection" }, 200);
   },

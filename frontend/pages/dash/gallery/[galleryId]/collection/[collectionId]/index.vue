@@ -3,9 +3,9 @@
     <h2 class="text-xl font-semibold">{{ collection?.name }}</h2>
     <TransitionGroup name="fade">
       <masonry-wall
-        v-if="collection?.images && collection.images.length > 0"
+        v-if="collection?.isShared && collection?.sharedCollectionImages.length > 0"
         class="mt-0.5"
-        :items="collection.images"
+        :items="collection?.sharedCollectionImages"
         :ssr-columns="1"
         :column-width="300"
         :gap="10"

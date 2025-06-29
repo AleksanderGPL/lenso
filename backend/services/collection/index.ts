@@ -29,9 +29,27 @@ app.get(
       columns: {
         name: true,
         galleryId: true,
+        isShared: true,
       },
       with: {
-        images: {
+        sharedCollectionImages: {
+          columns: {
+            collectionId: false,
+            imageId: false,
+            id: false,
+          },
+          with: {
+            image: {
+              columns: {
+                id: true,
+                fileName: true,
+                width: true,
+                height: true,
+              },
+            },
+          },
+        },
+        privateCollectionImages: {
           columns: {
             collectionId: false,
             imageId: false,

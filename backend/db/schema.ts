@@ -114,7 +114,8 @@ export const galleryImagesRelations = relations(
       fields: [galleryImagesTable.galleryId],
       references: [galleriesTable.id],
     }),
-    collections: many(galleryCollectionsImagesTable),
+    sharedCollections: many(gallerySharedCollectionsImagesTable),
+    privateCollections: many(galleryPrivateCollectionsImagesTable),
   }),
 );
 
@@ -157,12 +158,46 @@ export const galleryCollectionsRelations = relations(
       fields: [galleryCollectionsTable.galleryId],
       references: [galleriesTable.id],
     }),
-    images: many(galleryCollectionsImagesTable),
+    privateCollectionImages: many(galleryPrivateCollectionsImagesTable),
+    sharedCollectionImages: many(gallerySharedCollectionsImagesTable),
   }),
 );
 
-export const galleryCollectionsImagesTable = pgTable(
-  "gallery_collections_images",
+export const galleryPrivateCollectionsImagesTable = pgTable(
+  "gallery_private_collections_images",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    accessId: integer()
+      .notNull()
+      .references(() => galleryAccessKeyTable.id, { onDelete: "cascade" }),
+    collectionId: integer()
+      .notNull()
+      .references(() => galleryCollectionsTable.id, { onDelete: "cascade" }),
+    imageId: integer()
+      .notNull()
+      .references(() => galleryImagesTable.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    unique().on(t.accessId, t.collectionId, t.imageId),
+  ],
+);
+
+export const galleryPrivateCollectionsImagesRelations = relations(
+  galleryPrivateCollectionsImagesTable,
+  ({ one }) => ({
+    collection: one(galleryCollectionsTable, {
+      fields: [galleryPrivateCollectionsImagesTable.collectionId],
+      references: [galleryCollectionsTable.id],
+    }),
+    image: one(galleryImagesTable, {
+      fields: [galleryPrivateCollectionsImagesTable.imageId],
+      references: [galleryImagesTable.id],
+    }),
+  }),
+);
+
+export const gallerySharedCollectionsImagesTable = pgTable(
+  "gallery_shared_collections_images",
   {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     collectionId: integer()
@@ -177,15 +212,15 @@ export const galleryCollectionsImagesTable = pgTable(
   ],
 );
 
-export const galleryCollectionsImagesRelations = relations(
-  galleryCollectionsImagesTable,
+export const gallerySharedCollectionsImagesRelations = relations(
+  gallerySharedCollectionsImagesTable,
   ({ one }) => ({
     collection: one(galleryCollectionsTable, {
-      fields: [galleryCollectionsImagesTable.collectionId],
+      fields: [gallerySharedCollectionsImagesTable.collectionId],
       references: [galleryCollectionsTable.id],
     }),
     image: one(galleryImagesTable, {
-      fields: [galleryCollectionsImagesTable.imageId],
+      fields: [gallerySharedCollectionsImagesTable.imageId],
       references: [galleryImagesTable.id],
     }),
   }),
