@@ -168,6 +168,19 @@ app.post(
       }, 403);
     }
 
+    const image = await db.query.galleryImagesTable.findFirst({
+      where: and(
+        eq(galleryImagesTable.id, imageId),
+        eq(galleryImagesTable.galleryId, access.galleryId),
+      ),
+    });
+
+    if (!image) {
+      return c.json({
+        message: "Image not found",
+      }, 404);
+    }
+
     if (collection.isShared) {
       const existingImage = await db.query.gallerySharedCollectionsImagesTable
         .findFirst({

@@ -517,7 +517,10 @@ app.delete(
     }
 
     await db.delete(galleryAccessKeyTable).where(
-      eq(galleryAccessKeyTable.accessKey, accessKey),
+      and(
+        eq(galleryAccessKeyTable.accessKey, accessKey),
+        eq(galleryAccessKeyTable.galleryId, galleryId),
+      ),
     );
 
     return c.json({ message: "Access key deleted successfully" }, 200);
