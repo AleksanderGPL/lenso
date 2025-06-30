@@ -18,14 +18,14 @@ const app = new Hono();
 app.get(
   "/:collectionId",
   authRequired,
-  zValidator(
-    "param",
-    collectionByIdSchema,
-  ),
   rateLimit({
     windowMs: 60 * 1000,
     limit: 50,
   }),
+  zValidator(
+    "param",
+    collectionByIdSchema,
+  ),
   async (c) => {
     const session = c.get("session");
     const { collectionId } = c.req.valid("param");
@@ -110,6 +110,10 @@ app.get(
 app.get(
   "/:collectionId/access/:accessId",
   authRequired,
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
   zValidator(
     "param",
     z.object({
@@ -117,10 +121,6 @@ app.get(
       accessId: z.coerce.number(),
     }),
   ),
-  rateLimit({
-    windowMs: 60 * 1000,
-    limit: 50,
-  }),
   async (c) => {
     const session = c.get("session");
     const { collectionId, accessId } = c.req.valid("param");

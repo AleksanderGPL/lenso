@@ -44,6 +44,7 @@
         <ModalAddCollection
           v-if="isAddCollectionModalOpen"
           :gallery-id="Number(galleryId)"
+          @add="collections?.push($event)"
           @close="isAddCollectionModalOpen = false"
         />
       </Transition>

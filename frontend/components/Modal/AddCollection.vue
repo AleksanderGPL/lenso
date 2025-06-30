@@ -1,6 +1,6 @@
 <template>
   <UiModal card-class="w-md" title="Add collection" @close="emit('close')">
-    <form class="flex flex-col gap-4">
+    <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
       <div class="flex flex-col gap-1">
         <UiLabel for="name">Name</UiLabel>
         <UiInput id="name" v-model="formData.name" placeholder="Name..." />

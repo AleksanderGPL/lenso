@@ -52,6 +52,10 @@ export function registerRoutes(app: Hono) {
   app.post(
     "/:galleryId/collection",
     authRequired,
+    rateLimit({
+      windowMs: 60 * 1000,
+      limit: 50,
+    }),
     zValidator(
       "param",
       galleryByIdSchema,
@@ -60,10 +64,6 @@ export function registerRoutes(app: Hono) {
       "json",
       createCollectionSchema,
     ),
-    rateLimit({
-      windowMs: 60 * 1000,
-      limit: 50,
-    }),
     async (c) => {
       const session = c.get("session");
       const { galleryId } = c.req.valid("param");

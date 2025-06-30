@@ -15,7 +15,17 @@
         </span>
         {{ collection?.name }}
       </h2>
-      <UiButton @click="isDeleteModalOpen = true">Delete</UiButton>
+      <div class="flex gap-2">
+        <UiButton
+          v-if="collection?.isShared"
+          icon="mdi:content-copy"
+          @click="isCopyNamesModalOpen = true"
+          >Copy Filenames</UiButton
+        >
+        <UiButton icon="ic:baseline-delete" @click="isDeleteModalOpen = true"
+          >Delete</UiButton
+        >
+      </div>
     </div>
     <div v-if="collection?.accessKeys && !pending">
       <div class="flex flex-col gap-2">

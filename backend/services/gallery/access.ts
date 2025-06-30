@@ -20,11 +20,11 @@ const app = new Hono();
 
 app.get(
   "/:accessKey",
-  zValidator("param", accessKeySchema),
   rateLimit({
     windowMs: 60 * 1000,
     limit: 50,
   }),
+  zValidator("param", accessKeySchema),
   async (c) => {
     const { accessKey } = c.req.valid("param");
 
@@ -115,6 +115,10 @@ app.get(
 
 app.post(
   "/:accessKey/collection/:collectionId",
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
   zValidator(
     "param",
     z.object({
@@ -128,10 +132,6 @@ app.post(
       imageId: z.number(),
     }),
   ),
-  rateLimit({
-    windowMs: 60 * 1000,
-    limit: 50,
-  }),
   async (c) => {
     const { accessKey, collectionId } = c.req.valid("param");
     const { imageId } = c.req.valid("json");
@@ -216,6 +216,10 @@ app.post(
 
 app.delete(
   "/:accessKey/collection/:collectionId",
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
   zValidator(
     "param",
     z.object({
@@ -229,10 +233,6 @@ app.delete(
       imageId: z.number(),
     }),
   ),
-  rateLimit({
-    windowMs: 60 * 1000,
-    limit: 50,
-  }),
   async (c) => {
     const { accessKey, collectionId } = c.req.valid("param");
     const { imageId } = c.req.valid("json");

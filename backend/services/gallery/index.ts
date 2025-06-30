@@ -55,14 +55,14 @@ app.get(
 app.get(
   "/:galleryId",
   authRequired,
-  zValidator(
-    "param",
-    galleryByIdSchema,
-  ),
   rateLimit({
     windowMs: 60 * 1000,
     limit: 50,
   }),
+  zValidator(
+    "param",
+    galleryByIdSchema,
+  ),
   async (c) => {
     const session = c.get("session");
     const { galleryId } = c.req.valid("param");
@@ -319,6 +319,10 @@ app.delete(
 app.post(
   "/",
   authRequired,
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
   zValidator("json", createOrModifyGallerySchema),
   async (c) => {
     const session = c.get("session");
@@ -481,14 +485,14 @@ app.get(
 app.delete(
   "/:galleryId/access/:accessKey",
   authRequired,
-  zValidator(
-    "param",
-    z.object({ ...galleryByIdSchema.shape, ...accessKeySchema.shape }),
-  ),
   rateLimit({
     windowMs: 60 * 1000,
     limit: 50,
   }),
+  zValidator(
+    "param",
+    z.object({ ...galleryByIdSchema.shape, ...accessKeySchema.shape }),
+  ),
   async (c) => {
     const session = c.get("session");
     const { galleryId, accessKey } = c.req.valid("param");
