@@ -68,6 +68,7 @@ export const galleriesRelations = relations(
   ({ many }) => ({
     images: many(galleryImagesTable),
     accessKeys: many(galleryAccessKeyTable),
+    collections: many(galleryCollectionsTable),
   }),
 );
 
@@ -108,11 +109,13 @@ export const galleryImagesTable = pgTable("gallery_images", {
 
 export const galleryImagesRelations = relations(
   galleryImagesTable,
-  ({ one }) => ({
+  ({ one, many }) => ({
     gallery: one(galleriesTable, {
       fields: [galleryImagesTable.galleryId],
       references: [galleriesTable.id],
     }),
+    sharedCollections: many(gallerySharedCollectionsImagesTable),
+    privateCollections: many(galleryPrivateCollectionsImagesTable),
   }),
 );
 
@@ -124,15 +127,106 @@ export const galleryAccessKeyTable = pgTable("gallery_access_key", {
   accessKey: text().notNull().unique(),
   name: text().notNull(),
   canDownload: boolean().notNull(),
+  canUseCollections: boolean().notNull(),
   createdAt: timestamp().notNull().defaultNow(),
 });
 
 export const galleryAccessKeyRelations = relations(
   galleryAccessKeyTable,
-  ({ one }) => ({
+  ({ one, many }) => ({
     gallery: one(galleriesTable, {
       fields: [galleryAccessKeyTable.galleryId],
       references: [galleriesTable.id],
+    }),
+    privateCollectionImages: many(galleryPrivateCollectionsImagesTable),
+  }),
+);
+
+export const galleryCollectionsTable = pgTable("gallery_collections", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  galleryId: integer()
+    .notNull()
+    .references(() => galleriesTable.id, { onDelete: "cascade" }),
+  name: text().notNull(),
+  isShared: boolean().notNull(),
+  createdAt: timestamp().notNull().defaultNow(),
+});
+
+export const galleryCollectionsRelations = relations(
+  galleryCollectionsTable,
+  ({ one, many }) => ({
+    gallery: one(galleriesTable, {
+      fields: [galleryCollectionsTable.galleryId],
+      references: [galleriesTable.id],
+    }),
+    privateCollectionImages: many(galleryPrivateCollectionsImagesTable),
+    sharedCollectionImages: many(gallerySharedCollectionsImagesTable),
+  }),
+);
+
+export const galleryPrivateCollectionsImagesTable = pgTable(
+  "gallery_private_collections_images",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    accessId: integer()
+      .notNull()
+      .references(() => galleryAccessKeyTable.id, { onDelete: "cascade" }),
+    collectionId: integer()
+      .notNull()
+      .references(() => galleryCollectionsTable.id, { onDelete: "cascade" }),
+    imageId: integer()
+      .notNull()
+      .references(() => galleryImagesTable.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    unique().on(t.accessId, t.collectionId, t.imageId),
+  ],
+);
+
+export const galleryPrivateCollectionsImagesRelations = relations(
+  galleryPrivateCollectionsImagesTable,
+  ({ one }) => ({
+    collection: one(galleryCollectionsTable, {
+      fields: [galleryPrivateCollectionsImagesTable.collectionId],
+      references: [galleryCollectionsTable.id],
+    }),
+    image: one(galleryImagesTable, {
+      fields: [galleryPrivateCollectionsImagesTable.imageId],
+      references: [galleryImagesTable.id],
+    }),
+    accessKey: one(galleryAccessKeyTable, {
+      fields: [galleryPrivateCollectionsImagesTable.accessId],
+      references: [galleryAccessKeyTable.id],
+    }),
+  }),
+);
+
+export const gallerySharedCollectionsImagesTable = pgTable(
+  "gallery_shared_collections_images",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    collectionId: integer()
+      .notNull()
+      .references(() => galleryCollectionsTable.id, { onDelete: "cascade" }),
+    imageId: integer()
+      .notNull()
+      .references(() => galleryImagesTable.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    unique().on(t.collectionId, t.imageId),
+  ],
+);
+
+export const gallerySharedCollectionsImagesRelations = relations(
+  gallerySharedCollectionsImagesTable,
+  ({ one }) => ({
+    collection: one(galleryCollectionsTable, {
+      fields: [gallerySharedCollectionsImagesTable.collectionId],
+      references: [galleryCollectionsTable.id],
+    }),
+    image: one(galleryImagesTable, {
+      fields: [gallerySharedCollectionsImagesTable.imageId],
+      references: [galleryImagesTable.id],
     }),
   }),
 );

@@ -22,6 +22,7 @@ import { deleteFile, uploadFileBuffer } from "@/utils/s3.ts";
 import sharp from "sharp";
 import { generateUniqueAccessKey } from "@/utils/generate.ts";
 import access from "./access.ts";
+import registerCollectionRoutes from "./collection.ts";
 
 const app = new Hono();
 
@@ -54,14 +55,14 @@ app.get(
 app.get(
   "/:galleryId",
   authRequired,
-  zValidator(
-    "param",
-    galleryByIdSchema,
-  ),
   rateLimit({
     windowMs: 60 * 1000,
     limit: 50,
   }),
+  zValidator(
+    "param",
+    galleryByIdSchema,
+  ),
   async (c) => {
     const session = c.get("session");
     const { galleryId } = c.req.valid("param");
@@ -318,6 +319,10 @@ app.delete(
 app.post(
   "/",
   authRequired,
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
   zValidator("json", createOrModifyGallerySchema),
   async (c) => {
     const session = c.get("session");
@@ -326,17 +331,20 @@ app.post(
     const [gallery] = await db.insert(galleriesTable).values({
       name,
       description,
-    }).returning({
-      id: galleriesTable.id,
-    });
+    }).returning();
 
-    await db.insert(galleryAccessTable).values({
+    const [access] = await db.insert(galleryAccessTable).values({
       galleryId: gallery.id,
       userId: session.user.id,
       accessLevel: "OWNER",
+    }).returning({
+      id: galleryAccessTable.id,
     });
 
-    return c.json({ message: "Gallery created successfully" }, 201);
+    return c.json({
+      id: access.id,
+      gallery,
+    }, 201);
   },
 );
 
@@ -403,7 +411,7 @@ app.post(
   async (c) => {
     const session = c.get("session");
     const { galleryId } = c.req.valid("param");
-    const { name, canDownload } = c.req.valid("json");
+    const { name, canDownload, canUseCollections } = c.req.valid("json");
 
     const access = await db.query.galleryAccessTable.findFirst({
       where: and(
@@ -431,6 +439,7 @@ app.post(
       galleryId,
       accessKey,
       canDownload,
+      canUseCollections,
     }).returning();
 
     return c.json(insertedKey, 201);
@@ -476,14 +485,14 @@ app.get(
 app.delete(
   "/:galleryId/access/:accessKey",
   authRequired,
-  zValidator(
-    "param",
-    z.object({ ...galleryByIdSchema.shape, ...accessKeySchema.shape }),
-  ),
   rateLimit({
     windowMs: 60 * 1000,
     limit: 50,
   }),
+  zValidator(
+    "param",
+    z.object({ ...galleryByIdSchema.shape, ...accessKeySchema.shape }),
+  ),
   async (c) => {
     const session = c.get("session");
     const { galleryId, accessKey } = c.req.valid("param");
@@ -508,11 +517,16 @@ app.delete(
     }
 
     await db.delete(galleryAccessKeyTable).where(
-      eq(galleryAccessKeyTable.accessKey, accessKey),
+      and(
+        eq(galleryAccessKeyTable.accessKey, accessKey),
+        eq(galleryAccessKeyTable.galleryId, galleryId),
+      ),
     );
 
     return c.json({ message: "Access key deleted successfully" }, 200);
   },
 );
+
+registerCollectionRoutes(app);
 
 export default app;

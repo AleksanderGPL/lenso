@@ -12,17 +12,15 @@ export const createOrModifyGallerySchema = z.object({
 });
 
 export const galleryByIdSchema = z.object({
-  galleryId: z.string().refine(
-    (value) => !isNaN(Number(value)),
-    "galleryId must be a valid number",
-  ).transform((value) => Number(value)),
+  galleryId: z.coerce.number(),
 });
 
 export const imageByIdSchema = z.object({
-  imageId: z.string().refine(
-    (value) => !isNaN(Number(value)),
-    "imageId must be a valid number",
-  ).transform((value) => Number(value)),
+  imageId: z.coerce.number(),
+});
+
+export const collectionByIdSchema = z.object({
+  collectionId: z.coerce.number(),
 });
 
 export const accessKeySchema = z.object({
@@ -35,4 +33,13 @@ export const createAccessKeySchema = z.object({
     "Name must be at most 256 characters long",
   ),
   canDownload: z.boolean(),
+  canUseCollections: z.boolean(),
+});
+
+export const createCollectionSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters long").max(
+    256,
+    "Name must be at most 256 characters long",
+  ),
+  isShared: z.boolean(),
 });

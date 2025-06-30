@@ -20,7 +20,11 @@
     <UiSkeletonLoader v-else class="w-full grow" :loader-size="6" />
     <Teleport to="body">
       <Transition name="fade" mode="out-in">
-        <ModalAddGallery v-if="isOpen" @close="isOpen = false" />
+        <ModalAddGallery
+          v-if="isOpen"
+          @close="isOpen = false"
+          @add="galleries?.push($event)"
+        />
       </Transition>
     </Teleport>
   </div>

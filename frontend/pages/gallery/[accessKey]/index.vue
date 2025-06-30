@@ -27,12 +27,17 @@
       <template #default="{ item }">
         <GalleryImage
           :image="item"
+          :access-key="accessKey as string"
           :gallery-id="data.gallery.id"
+          :collections="data.gallery.collections"
           :can-download="data.canDownload"
+          :can-use-collections="data.canUseCollections"
           @image:click="
             currentImage = data.gallery.images.indexOf(item);
             isLightBoxOpen = true;
           "
+          @collection:add="handleAddToCollection(item, $event)"
+          @collection:remove="handleRemoveFromCollection(item, $event)"
         />
       </template>
     </masonry-wall>
@@ -41,6 +46,7 @@
         <GalleryLightBox
           v-if="isLightBoxOpen"
           :images="data.gallery.images"
+          :collections="data.gallery.collections"
           :gallery-id="data.gallery.id"
           :current-image="currentImage"
           @image:update="currentImage = $event"
@@ -52,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+import type { Image } from '~/types/image';
 import type { Gallery } from '~/types/gallery';
 
 const { accessKey } = useRoute().params;
@@ -59,11 +66,40 @@ const isLightBoxOpen = ref(false);
 const currentImage = ref(0);
 
 const api = useApi();
-const { data } = useAsyncData<{ canDownload: boolean; gallery: Gallery }>(
-  `gallery-access-${accessKey}`,
-  async () => {
-    const response = await api.get(`/gallery/access/${accessKey}`);
-    return response.data;
+const { data } = useAsyncData<{
+  canDownload: boolean;
+  canUseCollections: boolean;
+  gallery: Gallery;
+}>(`gallery-access-${accessKey}`, async () => {
+  const response = await api.get(`/gallery/access/${accessKey}`);
+  return response.data;
+});
+
+function handleAddToCollection(image: Image, collectionId: number) {
+  const collection = data.value?.gallery.collections.find(
+    (c) => c.id === collectionId
+  );
+  if (!collection) return;
+  if (collection.isShared) {
+    image.sharedCollections.push({ collectionId });
+  } else {
+    image.privateCollections.push({ collectionId });
   }
-);
+}
+
+function handleRemoveFromCollection(image: Image, collectionId: number) {
+  const collection = data.value?.gallery.collections.find(
+    (c) => c.id === collectionId
+  );
+  if (!collection) return;
+  if (collection.isShared) {
+    image.sharedCollections = image.sharedCollections.filter(
+      (c) => c.collectionId !== collectionId
+    );
+  } else {
+    image.privateCollections = image.privateCollections.filter(
+      (c) => c.collectionId !== collectionId
+    );
+  }
+}
 </script>
