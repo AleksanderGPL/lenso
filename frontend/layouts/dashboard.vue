@@ -63,6 +63,14 @@
       @click="isShown = !isShown"
     />
     <div class="transition-all w-full p-4" :class="{ 'ml-64': isShown }">
+      <div v-if="route.meta.title" class="mb-2">
+        <h2
+          class="text-xl font-semibold transition-all"
+          :class="{ 'ml-10': !isShown }"
+        >
+          {{ route.meta.title }}
+        </h2>
+      </div>
       <slot />
     </div>
   </div>

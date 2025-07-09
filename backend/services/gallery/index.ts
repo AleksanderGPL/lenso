@@ -18,7 +18,7 @@ import {
 } from "@/schema/services/gallery.ts";
 import { rateLimit } from "@/middleware/ratelimit.ts";
 import { z } from "zod";
-import { deleteFile, uploadFileBuffer } from "@/utils/s3.ts";
+import { deleteFile, deleteRecursive, uploadFileBuffer } from "@/utils/s3.ts";
 import sharp from "sharp";
 import { generateUniqueAccessKey } from "@/utils/generate.ts";
 import access from "./access.ts";
@@ -524,6 +524,47 @@ app.delete(
     );
 
     return c.json({ message: "Access key deleted successfully" }, 200);
+  },
+);
+
+app.delete(
+  "/:galleryId",
+  authRequired,
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 50,
+  }),
+  zValidator(
+    "param",
+    galleryByIdSchema,
+  ),
+  async (c) => {
+    const session = c.get("session");
+    const { galleryId } = c.req.valid("param");
+
+    const access = await db.query.galleryAccessTable.findFirst({
+      where: and(
+        eq(galleryAccessTable.userId, session.user.id),
+        eq(galleryAccessTable.galleryId, galleryId),
+      ),
+    });
+
+    if (!access) {
+      return c.json({
+        message: "Gallery not found",
+      }, 404);
+    }
+
+    if (!["OWNER"].includes(access.accessLevel)) {
+      return c.json({
+        message: "You do not have permission to delete this gallery",
+      }, 403);
+    }
+
+    await deleteRecursive(`gallery/${galleryId}`);
+    await db.delete(galleriesTable).where(eq(galleriesTable.id, galleryId));
+
+    return c.json({ message: "Gallery deleted successfully" }, 200);
   },
 );
 

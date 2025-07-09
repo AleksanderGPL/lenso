@@ -1,6 +1,5 @@
 <template>
   <div class="flex flex-col gap-2">
-    <h2 class="text-xl font-semibold">General</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <UiCard
         as="form"
@@ -22,6 +21,16 @@
         >
       </UiCard>
       <CardGalleryAccessLinks :gallery-id="Number(galleryId)" class="h-fit" />
+      <UiCard>
+        <h3 class="text-lg font-semibold mb-2">Danger Zone</h3>
+        <UiButton
+          variant="danger"
+          icon="mdi:delete"
+          class="w-full"
+          @click="deleteGallery"
+          >Delete Gallery</UiButton
+        >
+      </UiCard>
     </div>
   </div>
 </template>
@@ -32,7 +41,8 @@ import type { Gallery } from '~/types/gallery';
 definePageMeta({
   layout: 'dashboard',
   sidebar: 'gallery',
-  middleware: 'auth'
+  middleware: 'auth',
+  title: 'General'
 });
 
 const api = useApi();
@@ -55,5 +65,10 @@ async function updateGallery() {
   } finally {
     isSaving.value = false;
   }
+}
+
+async function deleteGallery() {
+  await api.delete(`/gallery/${galleryId}`);
+  navigateTo('/dash/galleries');
 }
 </script>

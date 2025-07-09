@@ -1,6 +1,5 @@
 <template>
-  <div class="flex h-full flex-col gap-2">
-    <h2 class="text-xl font-semibold">Images</h2>
+  <div class="flex h-full flex-col">
     <CardFileUpload
       :is-uploading="isUploading"
       :can-compress="true"
@@ -37,7 +36,8 @@ import type { Image } from '@/types/image';
 definePageMeta({
   layout: 'dashboard',
   sidebar: 'gallery',
-  middleware: 'auth'
+  middleware: 'auth',
+  title: 'Images'
 });
 
 const api = useApi();
