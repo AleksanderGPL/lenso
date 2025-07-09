@@ -13,8 +13,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: '',
-      s3Endpoint: '',
-      s3Bucket: '',
+      s3Base: '',
       pusherKey: '',
       pusherCluster: '',
       pusherWsHost: ''
