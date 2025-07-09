@@ -227,11 +227,13 @@ app.post(
           fileName: imageName,
           height: metadata.height,
           width: metadata.width,
+          size: imageBuffer.byteLength.toString(),
         }).returning({
           id: galleryImagesTable.id,
           fileName: galleryImagesTable.fileName,
           height: galleryImagesTable.height,
           width: galleryImagesTable.width,
+          size: galleryImagesTable.size,
         });
 
         await uploadFileBuffer({

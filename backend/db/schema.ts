@@ -1,5 +1,6 @@
 import {
   boolean,
+  decimal,
   integer,
   pgEnum,
   pgTable,
@@ -103,6 +104,7 @@ export const galleryImagesTable = pgTable("gallery_images", {
   fileName: text().notNull(),
   height: integer().notNull(),
   width: integer().notNull(),
+  size: decimal().notNull(),
 }, (t) => [
   unique().on(t.galleryId, t.fileName),
 ]);
