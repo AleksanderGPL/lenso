@@ -127,7 +127,10 @@ app.get(
       }, 404);
     }
 
-    return c.json(access.gallery.images);
+    return c.json({
+      images: access.gallery.images,
+      uuid: access.gallery.uuid,
+    });
   },
 );
 
@@ -167,6 +170,13 @@ app.post(
         eq(galleryAccessTable.userId, session.user.id),
         eq(galleryAccessTable.galleryId, galleryId),
       ),
+      with: {
+        gallery: {
+          columns: {
+            uuid: true,
+          },
+        },
+      },
     });
 
     if (!access) {
@@ -238,7 +248,7 @@ app.post(
 
         await uploadFileBuffer({
           buffer: new Uint8Array(imageBuffer),
-          key: `gallery/${access.galleryId}/${imageName}`,
+          key: `gallery/${access.gallery.uuid}/${imageName}`,
         });
 
         uploadedImages.push(uploadedImage);

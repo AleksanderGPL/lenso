@@ -7,6 +7,7 @@ import {
   text,
   timestamp,
   unique,
+  uuid,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { GALLERY_ACCESS_LEVELS } from "../utils/global.ts";
@@ -59,6 +60,7 @@ export const userSessionsRelations = relations(
 
 export const galleriesTable = pgTable("galleries", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  uuid: uuid().notNull().defaultRandom(),
   name: text().notNull(),
   description: text(),
   createdAt: timestamp().notNull().defaultNow(),

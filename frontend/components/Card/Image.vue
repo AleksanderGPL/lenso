@@ -13,7 +13,7 @@
       />
     </div>
     <img
-      :src="getS3Url(`gallery/${galleryId}/${image.fileName}`)"
+      :src="getS3Url(`gallery/${galleryUuid}/${image.fileName}`)"
       :width="image.width"
       :height="image.height"
       loading="lazy"
@@ -31,6 +31,7 @@ const emit = defineEmits(['delete']);
 
 const props = defineProps<{
   image: Image;
+  galleryUuid: string;
   galleryId: string;
 }>();
 

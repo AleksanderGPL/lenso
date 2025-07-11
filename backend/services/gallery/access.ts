@@ -66,6 +66,7 @@ app.get(
           },
           columns: {
             id: true,
+            uuid: true,
             name: true,
             description: true,
           },

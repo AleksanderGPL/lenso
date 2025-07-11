@@ -112,6 +112,7 @@ const props = defineProps<{
   canDownload: boolean;
   canUseCollections: boolean;
   galleryId: number;
+  galleryUuid: string;
   accessKey: string;
 }>();
 
@@ -125,7 +126,7 @@ const pendingAdd = ref<number[]>([]);
 const pendingRemove = ref<number[]>([]);
 
 const imageUrl = computed(() =>
-  getS3Url(`gallery/${props.galleryId}/${props.image.fileName}`)
+  getS3Url(`gallery/${props.galleryUuid}/${props.image.fileName}`)
 );
 
 const showPlusButton = computed(

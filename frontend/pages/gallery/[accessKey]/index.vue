@@ -6,7 +6,7 @@
         class="w-full h-screen object-cover"
         :src="
           getS3Url(
-            `gallery/${data?.gallery.id}/${data?.gallery.images[0].fileName}`
+            `gallery/${data.gallery.uuid}/${data.gallery.images[0].fileName}`
           )
         "
       />
@@ -29,6 +29,7 @@
           :image="item"
           :access-key="accessKey as string"
           :gallery-id="data.gallery.id"
+          :gallery-uuid="data.gallery.uuid"
           :collections="data.gallery.collections"
           :can-download="data.canDownload"
           :can-use-collections="data.canUseCollections"
@@ -48,6 +49,7 @@
           :images="data.gallery.images"
           :collections="data.gallery.collections"
           :gallery-id="data.gallery.id"
+          :gallery-uuid="data.gallery.uuid"
           :current-image="currentImage"
           @image:update="currentImage = $event"
           @close="isLightBoxOpen = false"

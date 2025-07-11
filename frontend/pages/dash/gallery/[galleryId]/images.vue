@@ -9,9 +9,9 @@
     />
     <TransitionGroup name="fade">
       <masonry-wall
-        v-if="images && images.length > 0"
-        class="mt-0.5"
-        :items="images"
+        v-if="data && data.images.length > 0"
+        class="mt-2"
+        :items="data.images"
         :ssr-columns="1"
         :column-width="300"
         :gap="10"
@@ -21,6 +21,7 @@
             :key="item.id"
             :image="item"
             :gallery-id="galleryId as string"
+            :gallery-uuid="data.uuid"
             @delete="deleteImage(item)"
           />
         </template>
@@ -45,7 +46,7 @@ const isUploading = ref(false);
 const compress = ref(true);
 const { galleryId } = useRoute().params;
 
-const { data: images, pending } = useAsyncData<Image[]>(
+const { data, pending } = useAsyncData<{ images: Image[]; uuid: string }>(
   `gallery-${galleryId}-images`,
   async () => {
     return (await api.get(`/gallery/${galleryId}/images`)).data;
@@ -61,13 +62,19 @@ async function uploadImages(files: File[]) {
       compress: compress.value
     });
 
-    images.value = [...(images.value || []), ...response.data];
+    data.value = {
+      images: [...(data.value?.images || []), ...response.data],
+      uuid: data.value?.uuid || ''
+    };
   } finally {
     isUploading.value = false;
   }
 }
 
 function deleteImage(image: Image) {
-  images.value = images.value?.filter((img) => img.id !== image.id) || [];
+  data.value = {
+    images: data.value?.images.filter((img) => img.id !== image.id) || [],
+    uuid: data.value?.uuid || ''
+  };
 }
 </script>

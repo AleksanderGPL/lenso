@@ -32,7 +32,7 @@
               class="object-contain w-auto h-full shadow-2xl"
               :src="
                 getS3Url(
-                  `gallery/${galleryId}/${images[currentImage].fileName}`
+                  `gallery/${galleryUuid}/${images[currentImage].fileName}`
                 )
               "
               :width="images[currentImage].width"
@@ -85,6 +85,7 @@ import type { Image } from '~/types/image';
 const props = defineProps<{
   images: Image[];
   galleryId: number;
+  galleryUuid: string;
   currentImage: number;
 }>();
 
