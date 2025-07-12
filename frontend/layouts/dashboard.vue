@@ -10,7 +10,7 @@
             name="material-symbols:photo-library-outline-rounded"
             size="1.25rem"
           />
-          <h1 class="text-lg font-semibold">Gallery</h1>
+          <h1 class="text-lg font-semibold">Lenso</h1>
         </div>
         <UiButton
           icon="mdi:chevron-left"
