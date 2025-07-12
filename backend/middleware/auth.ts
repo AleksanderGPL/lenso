@@ -12,7 +12,7 @@ export const authRequired = createMiddleware<{
     };
   };
 }>(async (c, next) => {
-  const sessionToken = getCookie(c, "gallery_session");
+  const sessionToken = getCookie(c, "lenso_session");
 
   if (!sessionToken) {
     return c.json({
@@ -28,7 +28,7 @@ export const authRequired = createMiddleware<{
   });
 
   if (!session || session.expiresAt < new Date()) {
-    deleteCookie(c, "gallery_session");
+    deleteCookie(c, "lenso_session");
     return c.json({
       message: "Incorrect session token.",
     }, 401);

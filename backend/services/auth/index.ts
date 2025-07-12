@@ -158,17 +158,17 @@ app.post(
     try {
       await sendMail({
         to: email,
-        subject: "Gallery - Email verification",
+        subject: "Lenso - Email verification",
         text: `Hi ${name}!
 
-        Thank you for registering to Gallery!
+        Thank you for registering to Lenso!
         To activate your account, click the link below:
         ${FRONTEND_URL}/auth/verify-email/${emailVerificationToken}
         
-        If you did not register to Gallery, please ignore this email.
+        If you did not register to Lenso, please ignore this email.
         
         Best regards,
-        Gallery Team`,
+        Lenso Team`,
       });
     } catch (error) {
       console.error("Failed to send email:", error);
@@ -242,7 +242,7 @@ app.post(
       id: userSessionsTable.id,
     });
 
-    setCookie(c, "gallery_session", sessionToken, {
+    setCookie(c, "lenso_session", sessionToken, {
       httpOnly: true,
       secure: COOKIE_SECURE,
       sameSite: "lax",
@@ -294,7 +294,7 @@ app.post("/logout", authRequired, async (c) => {
     eq(userSessionsTable.sessionToken, session.sessionToken),
   );
 
-  deleteCookie(c, "gallery_session");
+  deleteCookie(c, "lenso_session");
 
   return c.json({ message: "Logged out successfully" }, 200);
 });
@@ -321,7 +321,7 @@ app.post(
 
     await sendMail({
       to: email,
-      subject: "Gallery - Reset password",
+      subject: "Lenso - Reset password",
 
       text: `Hi ${user.name}!
 
@@ -329,7 +329,7 @@ app.post(
       ${FRONTEND_URL}/auth/reset-password/${resetPasswordToken}
       
       Best regards,
-      Gallery Team
+      Lenso Team
       `,
     });
 
