@@ -226,10 +226,10 @@ app.post(
         if (compress) {
           imageBuffer = new Uint8Array(
             await sharpImage
-              .avif({ quality: 75 })
+              .webp({ quality: 75 })
               .toBuffer(),
           );
-          imageName = imageName.split(".")[0] + ".avif";
+          imageName = imageName.split(".")[0] + ".webp";
         }
 
         const [uploadedImage] = await db.insert(galleryImagesTable).values({
