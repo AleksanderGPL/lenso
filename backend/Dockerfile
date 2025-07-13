@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN deno install --allow-scripts=npm:sharp,npm:argon2
+RUN deno install --allow-scripts=npm:sharp
 
 EXPOSE 8000
 
