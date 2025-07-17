@@ -309,13 +309,15 @@ app.delete(
       }, 403);
     }
 
-    if (!access.gallery.images.find((image) => image.id === imageId)) {
+    const image = access.gallery.images.find((image) => image.id === imageId);
+
+    if (!image) {
       return c.json({
         message: "Image not found",
       }, 404);
     }
 
-    await deleteFile(`gallery/${access.gallery.uuid}/${imageId}`);
+    await deleteFile(`gallery/${access.gallery.uuid}/${image.fileName}`);
 
     await db.delete(galleryImagesTable).where(
       and(
