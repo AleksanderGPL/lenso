@@ -315,7 +315,7 @@ app.delete(
       }, 404);
     }
 
-    await deleteFile(`gallery/${galleryId}/${imageId}`);
+    await deleteFile(`gallery/${access.gallery.uuid}/${imageId}`);
 
     await db.delete(galleryImagesTable).where(
       and(
