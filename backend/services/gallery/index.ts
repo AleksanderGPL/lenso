@@ -561,6 +561,13 @@ app.delete(
         eq(galleryAccessTable.userId, session.user.id),
         eq(galleryAccessTable.galleryId, galleryId),
       ),
+      with: {
+        gallery: {
+          columns: {
+            uuid: true,
+          },
+        },
+      },
     });
 
     if (!access) {
@@ -575,7 +582,7 @@ app.delete(
       }, 403);
     }
 
-    await deleteRecursive(`gallery/${galleryId}`);
+    await deleteRecursive(`gallery/${access.gallery.uuid}`);
     await db.delete(galleriesTable).where(eq(galleriesTable.id, galleryId));
 
     return c.json({ message: "Gallery deleted successfully" }, 200);
