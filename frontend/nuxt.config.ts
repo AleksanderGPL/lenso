@@ -20,5 +20,11 @@ export default defineNuxtConfig({
     }
   },
 
+  icon: {
+    clientBundle: {
+      scan: true
+    }
+  },
+
   modules: ['@pinia/nuxt', '@nuxt/icon', '@nuxt/fonts', '@nuxt/eslint']
 });

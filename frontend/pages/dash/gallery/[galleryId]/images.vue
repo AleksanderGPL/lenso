@@ -1,6 +1,7 @@
 <template>
   <div class="flex h-full flex-col">
     <CardFileUpload
+      class="mb-2"
       :is-uploading="isUploading"
       :can-compress="true"
       :compress="compress"
@@ -10,7 +11,6 @@
     <TransitionGroup name="fade">
       <masonry-wall
         v-if="data && data.images.length > 0"
-        class="mt-2"
         :items="data.images"
         :ssr-columns="1"
         :column-width="300"
